@@ -19,9 +19,9 @@ FEATURES = [
 ]
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-BENCHMARK_DIR = os.path.join(PROJECT_ROOT, "04_Dataset_Benchmarks")
+BENCHMARK_DIR = os.path.join(PROJECT_ROOT, "Datasets")
 if not os.path.exists(BENCHMARK_DIR):
-    BENCHMARK_DIR = os.path.join(PROJECT_ROOT, "multi_dataset_benchmark")
+    BENCHMARK_DIR = os.path.join(PROJECT_ROOT, "04_Dataset_Benchmarks")
 
 print("Universal Multi-Dataset TinyML Training")
 print("Datasets: CIC-IDS-2017, CSE-CIC-IDS2018, CIC-DDoS2019")
@@ -98,7 +98,8 @@ print(f"Overall Accuracy: {acc * 100:.2f}%")
 report_str = classification_report(y_test, y_pred, digits=4)
 print(report_str)
 
-report_dest = os.path.join(PROJECT_ROOT, "01_Documentation_and_Viva", "multi_dataset_evaluation_report.txt")
+report_dest = os.path.join(PROJECT_ROOT, "Documentation", "history", "history_multi_dataset_raw_report.txt")
+os.makedirs(os.path.dirname(report_dest), exist_ok=True)
 with open(report_dest, "w") as f:
     f.write("UNIVERSAL MULTI-DATASET MODEL EVALUATION (2017 + 2018 + 2019)\n")
     f.write(f"Overall Accuracy: {acc * 100:.2f}%\n\n")
@@ -110,6 +111,6 @@ model_dest_1 = os.path.join(SCRIPT_DIR, "pure_rf_multi.py")
 with open(model_dest_1, "w") as f:
     f.write(code)
 
-model_dest_2 = os.path.join(PROJECT_ROOT, "05_Gateway_Runtime", "pure_rf_multi.py")
+model_dest_2 = os.path.join(PROJECT_ROOT, "Gateway", "pure_rf_multi.py")
 with open(model_dest_2, "w") as f:
     f.write(code)

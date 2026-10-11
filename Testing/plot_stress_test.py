@@ -8,6 +8,8 @@ plt.rcParams['font.sans-serif'] = 'Helvetica', 'Arial', 'DejaVu Sans'
 plt.rcParams['axes.edgecolor'] = '#cccccc'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(SCRIPT_DIR, "stress_test_log.csv")
+if not os.path.exists(CSV_PATH):
+    CSV_PATH = os.path.join(SCRIPT_DIR, "history", "history_stress_test_log.csv")
 
 def generate_stress_test_charts(csv_file=CSV_PATH):
     if not os.path.exists(csv_file):

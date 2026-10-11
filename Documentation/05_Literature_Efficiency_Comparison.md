@@ -10,20 +10,20 @@
 
 In this report, I provide an empirical, publication-backed comparison of my **Autonomous Edge-AI Security Gateway** against published research papers that evaluated intrusion detection systems on edge hardware (Raspberry Pi, microcontrollers) and cloud environments.
 
-Rather than relying on theoretical comparisons, every benchmark cited in this document is verified against peer-reviewed papers archived in the [`02_Publications_Proof/`](../02_Publications_Proof/) directory.
+Rather than relying on theoretical comparisons, every benchmark cited in this document is verified against peer-reviewed papers archived in the [`Publications/`](../Publications/) directory.
 
 ---
 
 ## 2. Hardware and Efficiency Benchmark Matrix
 
 | Paper & Authors | Publication Venue & Year | Evaluated Platform | Detection Approach | Measured Latency / Response Time | Measured Resource Utilization | Reported Accuracy / F1 | Proof File in Repo |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Cherukuri** [1] | *IJFMR*, 2024 | Centralized Cloud Server vs. Edge Node | Cloud vs. Edge Real-Time AI | **Cloud: 100 – 200 ms**<br>**Edge: 10 – 20 ms** | Cloud: 1k–10k tasks/s<br>Edge: 100–1k tasks/s | Security: Cloud 6/10<br>Edge 7/10 | [`Cherukuri2024_Edge_vs_Cloud_AI.pdf`](../02_Publications_Proof/Cherukuri2024_Edge_vs_Cloud_AI.pdf) |
-| **Ali et al.** [2] | *IEEE IoT Journal*, 2025 | Edge Nodes / Raspberry Pi | Deep Transfer Learning (ResNet / VGG-RED) | **High Latency** (Multi-tensor forward passes) | High Edge CPU saturation; large neural weight footprint | 95.97% (AdaBoost)<br>73.70% (RF baseline) | [`Ali2025_IEEE_IoT_Edge_IDS.pdf`](../02_Publications_Proof/Ali2025_IEEE_IoT_Edge_IDS.pdf) |
-| **Amuthadevi et al.** [3] | *Sustainable Energy*, 2024 | Energy-Constrained IoT Edge Devices | TinyML (Random Forest, AdaBoost) | **~10 – 50 ms** window on MCU | Constrained power; traditional RF incurs memory overhead on MCUs | 99.39% Accuracy<br>99.45% F1-score | [`Amuthadevi2024_TinyML_IoT_IDS.pdf`](../02_Publications_Proof/Amuthadevi2024_TinyML_IoT_IDS.pdf) |
-| **Hafid & Ezzouhairi** [4] | *IEEE Conference*, 2024 | IoT Edge Gateway Architecture | Random Forest, Decision Tree | **15 – 35 ms** flow ingestion | High edge memory cited without model compression | 86.0% Accuracy<br>89.0% Recall | [`Hafid2024_IEEE_IoT_Edge_IDS.pdf`](../02_Publications_Proof/Hafid2024_IEEE_IoT_Edge_IDS.pdf) |
-| **Standard Edge Python Deployment** [5] | Local Benchmark Baseline | Raspberry Pi 4 Model B (ARM Cortex-A72) | Standard Scikit-Learn `.pkl` Random Forest | **15.20 ms** per flow *(Framework overhead)* | **25% – 35% CPU**<br>140 – 180 MB RAM | 99.98% Accuracy | `Findings_and_Tradeoffs.txt` (Local test log) |
-| **My Project (Autonomous Gateway)** | **Current FYP Implementation** | **Raspberry Pi 4 Model B (ARM Cortex-A72)** | **Compiled Pure RF (`m2cgen`) + Deterministic L4 Filter** | **0.021 ms** per flow (~47,600 flows/sec) | **0.0% – 0.3% Idle CPU** (Peak 15% during burst)<br>**~24 MB RAM** | **96.70% Multi-Dataset**<br>**97.18% IoT Accuracy** | Live Prototype (`dashboard.py` and `pure_rf_multi.py`) |
+| :--- | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
+| **Cherukuri** [1] | *IJFMR*, 2024 | Centralized Cloud Server vs. Edge Node | Cloud vs. Edge Real-Time AI | **Cloud: 100 – 200 ms**<br>**Edge: 10 – 20 ms** | Cloud: 1k–10k tasks/s<br>Edge: 100–1k tasks/s | Security: Cloud 6/10<br>Edge 7/10 | [`Cherukuri2024_Edge_vs_Cloud_AI.pdf`](../Publications/Cherukuri2024_Edge_vs_Cloud_AI.pdf) |
+| **Ali et al.** [2] | *IEEE IoT Journal*, 2025 | Edge Nodes / Raspberry Pi | Deep Transfer Learning (ResNet / VGG-RED) | **High Latency** (Multi-tensor forward passes) | High Edge CPU saturation; large neural weight footprint | 95.97% (AdaBoost)<br>73.70% (RF baseline) | [`Ali2025_IEEE_IoT_Edge_IDS.pdf`](../Publications/Ali2025_IEEE_IoT_Edge_IDS.pdf) |
+| **Amuthadevi et al.** [3] | *Sustainable Energy*, 2024 | Energy-Constrained IoT Edge Devices | TinyML (Random Forest, AdaBoost) | **~10 – 50 ms** window on MCU | Constrained power; traditional RF incurs memory overhead on MCUs | 99.39% Accuracy<br>99.45% F1-score | [`Amuthadevi2024_TinyML_IoT_IDS.pdf`](../Publications/Amuthadevi2024_TinyML_IoT_IDS.pdf) |
+| **Hafid & Ezzouhairi** [4] | *IEEE Conference*, 2024 | IoT Edge Gateway Architecture | Random Forest, Decision Tree | **15 – 35 ms** flow ingestion | High edge memory cited without model compression | 86.0% Accuracy<br>89.0% Recall | [`Hafid2024_IEEE_IoT_Edge_IDS.pdf`](../Publications/Hafid2024_IEEE_IoT_Edge_IDS.pdf) |
+| **Standard Edge Python Deployment** [5] | Local Benchmark Baseline | Raspberry Pi 4 Model B (ARM Cortex-A72) | Standard Scikit-Learn `.pkl` Random Forest | **15.20 ms** per flow *(Framework overhead)* | **25% – 35% CPU**<br>140 – 180 MB RAM | 99.98% Accuracy | [`history_findings_and_tradeoffs.txt`](history/history_findings_and_tradeoffs.txt) (Local test log) |
+| **My Project (Autonomous Gateway)** | **Current FYP Implementation** | **Raspberry Pi 4 Model B (ARM Cortex-A72)** | **Compiled Pure RF (`m2cgen`) + Deterministic L4 Filter** | **0.021 ms** per flow (~47,600 flows/sec) | **0.0% – 0.3% Idle CPU** (Peak 15% during burst)<br>**~24 MB RAM** | **96.70% Multi-Dataset**<br>**97.18% IoT Accuracy** | Live Prototype ([`Gateway/dashboard.py`](../Gateway/dashboard.py) and [`Gateway/pure_rf_multi.py`](../Gateway/pure_rf_multi.py)) |
 
 ---
 
@@ -60,8 +60,8 @@ To prevent volumetric SYN floods from exhausting edge memory, I designed a deter
 
 ## 5. Summary Reference Citations
 
-1. Cherukuri, B. R. (2024). *Edge Computing vs. Cloud Computing: A Comparative Analysis for Real-Time AI Applications*. IJFMR, 6(5). [`Cherukuri2024_Edge_vs_Cloud_AI.pdf`](../02_Publications_Proof/Cherukuri2024_Edge_vs_Cloud_AI.pdf)
-2. Ali, Z., Tiberti, W., Marotta, A., & Cassioli, D. (2025). *Deep Transfer Learning for Intrusion Detection in Edge Computing Scenarios*. IEEE IoT Journal, 12(21). [`Ali2025_IEEE_IoT_Edge_IDS.pdf`](../02_Publications_Proof/Ali2025_IEEE_IoT_Edge_IDS.pdf)
-3. Amuthadevi, C., Venkatesan, R., Mythily, M., & Aroul Canessane, R. (2024). *TinyML-based intrusion detection systems for sustainable and energy-constrained IoT devices*. Sustainable Energy, 7. [`Amuthadevi2024_TinyML_IoT_IDS.pdf`](../02_Publications_Proof/Amuthadevi2024_TinyML_IoT_IDS.pdf)
-4. Hafid, B., & Ezzouhairi, A. (2024). *Strengthening Security in the Internet of Things (IoT): Integrated Approach of Intrusion Detection Systems (IDS) and Edge Computing*. IEEE IoT Conf. [`Hafid2024_IEEE_IoT_Edge_IDS.pdf`](../02_Publications_Proof/Hafid2024_IEEE_IoT_Edge_IDS.pdf)
-5. Mohale, V. Z., & Obagbuwa, I. C. (2024). *Evaluating machine learning-based intrusion detection systems with explainable AI*. Frontiers in Computer Science, 6. [`Mohale2024_Frontiers_XAI_IDS.pdf`](../02_Publications_Proof/Mohale2024_Frontiers_XAI_IDS.pdf)
+1. Cherukuri, B. R. (2024). *Edge Computing vs. Cloud Computing: A Comparative Analysis for Real-Time AI Applications*. IJFMR, 6(5). [`Cherukuri2024_Edge_vs_Cloud_AI.pdf`](../Publications/Cherukuri2024_Edge_vs_Cloud_AI.pdf)
+2. Ali, Z., Tiberti, W., Marotta, A., & Cassioli, D. (2025). *Deep Transfer Learning for Intrusion Detection in Edge Computing Scenarios*. IEEE IoT Journal, 12(21). [`Ali2025_IEEE_IoT_Edge_IDS.pdf`](../Publications/Ali2025_IEEE_IoT_Edge_IDS.pdf)
+3. Amuthadevi, C., Venkatesan, R., Mythily, M., & Aroul Canessane, R. (2024). *TinyML-based intrusion detection systems for sustainable and energy-constrained IoT devices*. Sustainable Energy, 7. [`Amuthadevi2024_TinyML_IoT_IDS.pdf`](../Publications/Amuthadevi2024_TinyML_IoT_IDS.pdf)
+4. Hafid, B., & Ezzouhairi, A. (2024). *Strengthening Security in the Internet of Things (IoT): Integrated Approach of Intrusion Detection Systems (IDS) and Edge Computing*. IEEE IoT Conf. [`Hafid2024_IEEE_IoT_Edge_IDS.pdf`](../Publications/Hafid2024_IEEE_IoT_Edge_IDS.pdf)
+5. Mohale, V. Z., & Obagbuwa, I. C. (2024). *Evaluating machine learning-based intrusion detection systems with explainable AI*. Frontiers in Computer Science, 6. [`Mohale2024_Frontiers_XAI_IDS.pdf`](../Publications/Mohale2024_Frontiers_XAI_IDS.pdf)

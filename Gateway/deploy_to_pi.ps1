@@ -13,8 +13,8 @@ $filesToDeploy = @(
     (Join-Path $scriptDir "pure_rf_multi.py"),
     (Join-Path $scriptDir "gateway.service"),
     (Join-Path $scriptDir "setup_systemd.sh"),
-    (Join-Path $projectRoot "06_Testing_and_Telemetry\plot_stress_test.py"),
-    (Join-Path $projectRoot "06_Testing_and_Telemetry\simulate_traffic.py")
+    (Join-Path $projectRoot "Testing\plot_stress_test.py"),
+    (Join-Path $projectRoot "Testing\simulate_traffic.py")
 )
 
 foreach ($filePath in $filesToDeploy) {

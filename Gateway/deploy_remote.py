@@ -18,8 +18,8 @@ FILES_TO_UPLOAD = {
     "pure_rf_multi.py": os.path.join(SCRIPT_DIR, "pure_rf_multi.py"),
     "gateway.service": os.path.join(SCRIPT_DIR, "gateway.service"),
     "setup_systemd.sh": os.path.join(SCRIPT_DIR, "setup_systemd.sh"),
-    "plot_stress_test.py": os.path.join(PROJECT_ROOT, "06_Testing_and_Telemetry", "plot_stress_test.py"),
-    "simulate_traffic.py": os.path.join(PROJECT_ROOT, "06_Testing_and_Telemetry", "simulate_traffic.py")
+    "plot_stress_test.py": os.path.join(PROJECT_ROOT, "Testing", "plot_stress_test.py"),
+    "simulate_traffic.py": os.path.join(PROJECT_ROOT, "Testing", "simulate_traffic.py")
 }
 
 def run_sudo_command(ssh, command, password):

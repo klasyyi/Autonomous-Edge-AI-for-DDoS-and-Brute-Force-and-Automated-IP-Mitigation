@@ -7,6 +7,10 @@ __pycache__/
 .agents/
 .system_generated/
 
+# Local-only agent instructions & synchronization utilities (not for public repository)
+AGENTS.md
+sync_to_onedrive.ps1
+
 # OS and Editor Files
 .DS_Store
 Thumbs.db

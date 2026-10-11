@@ -29,35 +29,33 @@ I organized this workspace into 7 structured directories to ensure full reproduc
 
 ```text
 FYP/
-├── 01_Documentation_and_Viva/       # Technical reports, methodology, file audit, and defense notes
-├── 02_Publications_Proof/           # 12 Peer-reviewed published PDF papers used as academic proof
-├── 03_Models_and_Training/          # Multi-dataset training scripts and compiled decision-tree models
-├── 04_Dataset_Benchmarks/           # Harmonized benchmark datasets (2018, 2019, and 2023)
-├── 05_Gateway_Runtime/              # Production edge gateway engine, terminal UI, and systemd service
-├── 06_Testing_and_Telemetry/        # Traffic simulation scripts, stress test logs, and visualization code
-├── 07_Transcripts_and_History/      # Complete project history, chat logs, and 56 reference media files
-├── README.md                        # Master project documentation
-└── sync_to_onedrive.ps1             # Local-to-OneDrive synchronization utility
+├── Documentation/       # Technical reports, methodology, file audit, defense notes, and history
+├── Publications/        # 12 Peer-reviewed published PDF papers used as academic proof
+├── Models/              # Multi-dataset training scripts, compiled decision trees, and model history
+├── Datasets/            # Harmonized benchmark datasets (2018, 2019, and 2023)
+├── Gateway/             # Production edge gateway engine, terminal UI, and systemd service
+├── Testing/             # Traffic simulation scripts, stress test plots, and telemetry history
+├── History/             # Complete project history, chat logs, and 56 reference media files
+└── README.md            # Master project documentation
 ```
 
 ---
 
 ## Detailed Directory Breakdown
 
-### 1. `01_Documentation_and_Viva/`
-Technical reports, methodology documentation, and defense notes:
-- [`PROJECT_FILE_AUDIT.md`](01_Documentation_and_Viva/PROJECT_FILE_AUDIT.md) — Comprehensive technical audit of every single file, script, model, and dataset written in Simple Technical English.
-- [`KEY_LEARNINGS_AND_OVERCOMING_CHALLENGES.md`](01_Documentation_and_Viva/KEY_LEARNINGS_AND_OVERCOMING_CHALLENGES.md) — Personal account of the 7 hardest engineering challenges I solved, including cross-dataset distribution shift, raw socket parsing, and TinyML compilation.
-- [`FYP_EXECUTIVE_SUMMARY.md`](01_Documentation_and_Viva/FYP_EXECUTIVE_SUMMARY.md) — Summary brief of system architecture, edge performance, and evaluation metrics.
-- [`MULTI_DATASET_EVALUATION.md`](01_Documentation_and_Viva/MULTI_DATASET_EVALUATION.md) — Experimental evidence showing how I identified and eliminated single-dataset testbed bias across 2017, 2018, 2019, and 2023 datasets.
-- [`LITERATURE_COMPARISON_ACCURACY.md`](01_Documentation_and_Viva/LITERATURE_COMPARISON_ACCURACY.md) — Side-by-side comparison of my model accuracy against published literature across all four benchmark datasets.
-- [`LITERATURE_COMPARISON_EFFICIENCY.md`](01_Documentation_and_Viva/LITERATURE_COMPARISON_EFFICIENCY.md) — Hardware, RAM, and throughput comparison against Jetson Nano, Coral Edge TPU, and standard cloud models.
-- [`EVALUATION_METHODOLOGY.md`](01_Documentation_and_Viva/EVALUATION_METHODOLOGY.md) — Mathematical formulations for Precision, Recall, F1-Score, and data leakage isolation protocols.
-- [`VIVA_Results_and_Notes.md`](01_Documentation_and_Viva/VIVA_Results_and_Notes.md) — Direct technical explanations and Q&A preparation for examination panels.
-- `multi_dataset_evaluation_report.txt` — Raw classification report across 23,062 unseen test flows.
-- `Findings_and_Tradeoffs.txt` & `Model_Evolution_and_Accuracy.txt` — Development notes recording model progression and architectural trade-offs.
+### 1. `Documentation/`
+Technical reports, methodology documentation, defense notes, and historical logs:
+- [`01_Executive_Summary.md`](Documentation/01_Executive_Summary.md) — Summary brief of system architecture, edge performance, and evaluation metrics.
+- [`02_Key_Learnings_and_Challenges.md`](Documentation/02_Key_Learnings_and_Challenges.md) — Personal account of the 7 hardest engineering challenges I solved, including cross-dataset distribution shift, raw socket parsing, and TinyML compilation.
+- [`03_Multi_Dataset_Evaluation.md`](Documentation/03_Multi_Dataset_Evaluation.md) — Experimental evidence showing how I identified and eliminated single-dataset testbed bias across 2017, 2018, 2019, and 2023 datasets.
+- [`04_Literature_Accuracy_Comparison.md`](Documentation/04_Literature_Accuracy_Comparison.md) — Side-by-side comparison of my model accuracy against published literature across all four benchmark datasets.
+- [`05_Literature_Efficiency_Comparison.md`](Documentation/05_Literature_Efficiency_Comparison.md) — Hardware, RAM, and throughput comparison against Jetson Nano, Coral Edge TPU, and standard cloud models.
+- [`06_Evaluation_Methodology.md`](Documentation/06_Evaluation_Methodology.md) — Mathematical formulations for Precision, Recall, F1-Score, and data leakage isolation protocols.
+- [`07_Viva_Defense_Notes.md`](Documentation/07_Viva_Defense_Notes.md) — Direct technical explanations and Q&A preparation for examination panels.
+- [`08_Project_File_Audit.md`](Documentation/08_Project_File_Audit.md) — Comprehensive technical audit of every single file, script, model, and dataset written in Simple Technical English.
+- `history/` — Contains labeled raw classification reports and model development history (`history_multi_dataset_raw_report.txt`, `history_model_evolution_log.txt`, `history_findings_and_tradeoffs.txt`, `history_baseline_2017_evaluation.txt`).
 
-### 2. `02_Publications_Proof/`
+### 2. `Publications/`
 12 Peer-reviewed and arXiv research papers that I collected as empirical proof for my project defense:
 - `Sharafaldin2018_CICIDS2017.pdf` — ICISSP foundation paper introducing the CIC-IDS-2017 dataset.
 - `Zhou2019_CICIDS2017_Ensemble.pdf` — Springer research on feature selection and tree ensembles for network security.
@@ -72,37 +70,36 @@ Technical reports, methodology documentation, and defense notes:
 - `Cherukuri2024_Edge_vs_Cloud_AI.pdf` — Comparative study on edge versus cloud AI computing overhead.
 - `Ibrahim2026_IoT_ML_NIDS.pdf` — Survey of emerging machine learning NIDS architectures for IoT edge nodes.
 
-### 3. `03_Models_and_Training/`
+### 3. `Models/`
 Machine learning training pipelines, model evaluators, and compiled inference engines:
-- [`train_multi_dataset.py`](03_Models_and_Training/train_multi_dataset.py) — Multi-dataset training pipeline that unifies 2017, 2018, and 2019 flows, applies SMOTE strictly to the training fold, and cross-compiles to pure Python.
-- [`pure_rf_multi.py`](03_Models_and_Training/pure_rf_multi.py) — My compiled pure-Python Random Forest model (8 features, 3 classes, zero dependencies, 1.05 MB).
-- `train_v2.py` & `pure_rf_v2.py` — Earlier single-dataset models preserved for comparative ablation study.
-- `evaluate_model.py` — Standalone test harness for baseline model validation.
+- [`train_multi_dataset.py`](Models/train_multi_dataset.py) — Multi-dataset training pipeline that unifies 2017, 2018, and 2019 flows, applies SMOTE strictly to the training fold, and cross-compiles to pure Python.
+- [`pure_rf_multi.py`](Models/pure_rf_multi.py) — My compiled pure-Python Random Forest model (8 features, 3 classes, zero dependencies, 1.05 MB).
+- `history/` — Contains previous single-dataset baseline models and evaluators preserved for comparative ablation study (`history_train_v2_single_dataset.py`, `history_pure_rf_v2_model.py`, `history_evaluate_model.py`).
 
-### 4. `04_Dataset_Benchmarks/`
+### 4. `Datasets/`
 Benchmark dataset samples used for multi-year cross-validation:
 - `csecicids2018_sample.csv` (13.5 MB) — Cleaned sample of CSE-CIC-IDS-2018 network flows.
 - `cicddos2019_syn_sample.csv` (15.7 MB) — Cleaned sample of CIC-DDoS-2019 volumetric SYN attack traffic.
 - `ciciot2023_sample.parquet` (13.4 MB) — High-density traffic sample from the physical 105-device CIC-IoT-2023 testbed.
 
-### 5. `05_Gateway_Runtime/`
+### 5. `Gateway/`
 Production runtime software deployed on the Raspberry Pi edge device:
-- [`dashboard.py`](05_Gateway_Runtime/dashboard.py) — Core edge engine featuring real-time terminal UI, raw packet sniffer, sliding-window flow builder, TinyML inference, and automated iptables mitigation.
+- [`dashboard.py`](Gateway/dashboard.py) — Core edge engine featuring real-time terminal UI, raw packet sniffer, sliding-window flow builder, TinyML inference, and automated iptables mitigation.
 - `pure_rf_multi.py` — Deployed pure-Python inference model on the Raspberry Pi.
-- [`gateway.service`](05_Gateway_Runtime/gateway.service) — Linux systemd service unit for headless auto-start on boot.
-- [`setup_systemd.sh`](05_Gateway_Runtime/setup_systemd.sh) — Shell script to install and enable the systemd service on Linux.
-- [`check_pi_status.py`](05_Gateway_Runtime/check_pi_status.py) — Remote diagnostic script that queries the Pi over SSH for service state, uptime, memory, and firewall rules.
-- [`deploy_remote.py`](05_Gateway_Runtime/deploy_remote.py) / [`deploy_to_pi.ps1`](05_Gateway_Runtime/deploy_to_pi.ps1) — Automated SSH and SCP deployment scripts to synchronize code to the edge device.
+- [`gateway.service`](Gateway/gateway.service) — Linux systemd service unit for headless auto-start on boot.
+- [`setup_systemd.sh`](Gateway/setup_systemd.sh) — Shell script to install and enable the systemd service on Linux.
+- [`check_pi_status.py`](Gateway/check_pi_status.py) — Remote diagnostic script that queries the Pi over SSH for service state, uptime, memory, and firewall rules.
+- [`deploy_remote.py`](Gateway/deploy_remote.py) / [`deploy_to_pi.ps1`](Gateway/deploy_to_pi.ps1) — Automated SSH and SCP deployment scripts to synchronize code to the edge device.
 
-### 6. `06_Testing_and_Telemetry/`
+### 6. `Testing/`
 Edge load generation and telemetry analysis tools:
-- [`plot_stress_test.py`](06_Testing_and_Telemetry/plot_stress_test.py) — Matplotlib script that reads continuous telemetry and generates time-series charts.
-- `stress_test_log.csv` — Live performance log recorded on the Raspberry Pi 4 every 5 minutes.
+- [`plot_stress_test.py`](Testing/plot_stress_test.py) — Matplotlib script that reads continuous telemetry and generates time-series charts.
 - `stress_test_cpu_ram.png` — Visual evidence showing CPU stability (0.0% to 0.3%) and flatline RAM usage (~10.1% to 11.6%).
 - `stress_test_latency_flows.png` — Visual evidence showing microsecond latency and cumulative flow counters.
-- [`simulate_traffic.py`](06_Testing_and_Telemetry/simulate_traffic.py) — Traffic generator used to test benign sessions, volumetric SYN floods, and SSH brute-force probes against the gateway.
+- [`simulate_traffic.py`](Testing/simulate_traffic.py) — Traffic generator used to test benign sessions, volumetric SYN floods, and SSH brute-force probes against the gateway.
+- `history/` — Contains continuous telemetry logs recorded on the Raspberry Pi 4 (`history_stress_test_log.csv`).
 
-### 7. `07_Transcripts_and_History/`
+### 7. `History/`
 Full development log and preserved reference materials:
 - `FULL_CHAT_TRANSCRIPT.md` — Complete chronological log of research, implementation steps, and milestones.
 - `transcript_full.jsonl` — Machine-readable audit file.
@@ -114,22 +111,22 @@ Full development log and preserved reference materials:
 
 ### Check Live Edge Gateway Status
 ```powershell
-python 05_Gateway_Runtime/check_pi_status.py
+python Gateway/check_pi_status.py
 ```
 
 ### Retrain Multi-Dataset Model and Export Pure-Python Code
 ```powershell
-python 03_Models_and_Training/train_multi_dataset.py
+python Models/train_multi_dataset.py
 ```
 
 ### Generate Telemetry Plots from Raspberry Pi Logs
 ```powershell
-python 06_Testing_and_Telemetry/plot_stress_test.py
+python Testing/plot_stress_test.py
 ```
 
 ### Deploy Updated Runtime to Raspberry Pi
 ```powershell
-python 05_Gateway_Runtime/deploy_remote.py
+python Gateway/deploy_remote.py
 ```
 
 ---
