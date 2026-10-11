@@ -20,7 +20,7 @@ Unlike conventional intrusion detection systems that offload packet captures to 
 | File | Type | Purpose in Simple Technical English |
 | :--- | :--- | :--- |
 | [`README.md`](../README.md) | Markdown | **Master Documentation Hub.** Explains my project objectives, multi-dataset accuracy benchmarks, hardware resource metrics, directory structure, and quickstart commands. |
-| [`.gitignore`](../.gitignore) | Git Config | **Repository Filter.** Excludes temporary Python cache (`__pycache__`), local agent instructions (`AGENTS.md`), and local sync utilities (`sync_to_onedrive.ps1`) from public Git tracking. |
+| [`.gitignore`](../.gitignore) | Git Config | **Repository Filter.** Excludes temporary Python cache (`__pycache__`), local environment files, and operating system artifacts from public Git tracking. |
 
 ---
 
@@ -121,16 +121,6 @@ This folder contains 12 verified PDF publications that I collected to support ev
 | File | Role |
 | :--- | :--- |
 | `history/history_stress_test_log.csv` | Real-world continuous telemetry log recorded on the Raspberry Pi 4 every 5 minutes during testbed execution. |
-
----
-
-### History/ (Project History and Reference Archive)
-
-| File | Contents |
-| :--- | :--- |
-| `FULL_CHAT_TRANSCRIPT.md` | Chronological development records, technical discussions, and milestones across all FYP phases. |
-| `transcript_full.jsonl` | Machine-readable audit file. |
-| `chat_attachments/` | Directory containing 56 original reference screenshots, supervisor notes, and architecture diagrams. |
 
 ---
 

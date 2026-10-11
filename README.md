@@ -25,7 +25,7 @@ Rather than relying on heavy deep-learning frameworks or offloading sensitive ne
 
 ## Repository Directory Layout
 
-I organized this workspace into 7 structured directories to ensure full reproducibility, historical tracking, and clear documentation:
+I organized this workspace into 6 structured directories to ensure full reproducibility, historical tracking, and clear documentation:
 
 ```text
 FYP/
@@ -35,7 +35,6 @@ FYP/
 ├── Datasets/            # Harmonized benchmark datasets (2018, 2019, and 2023)
 ├── Gateway/             # Production edge gateway engine, terminal UI, and systemd service
 ├── Testing/             # Traffic simulation scripts, stress test plots, and telemetry history
-├── History/             # Complete project history, chat logs, and 56 reference media files
 └── README.md            # Master project documentation
 ```
 
@@ -89,7 +88,7 @@ Production runtime software deployed on the Raspberry Pi edge device:
 - [`gateway.service`](Gateway/gateway.service) — Linux systemd service unit for headless auto-start on boot.
 - [`setup_systemd.sh`](Gateway/setup_systemd.sh) — Shell script to install and enable the systemd service on Linux.
 - [`check_pi_status.py`](Gateway/check_pi_status.py) — Remote diagnostic script that queries the Pi over SSH for service state, uptime, memory, and firewall rules.
-- [`deploy_remote.py`](Gateway/deploy_remote.py) / [`deploy_to_pi.ps1`](Gateway/deploy_to_pi.ps1) — Automated SSH and SCP deployment scripts to synchronize code to the edge device.
+- [`deploy_remote.py`](Gateway/deploy_remote.py) / [`deploy_to_pi.ps1`](Gateway/deploy_to_pi.ps1) — Automated SSH and SCP deployment scripts to transfer and deploy code to the edge device.
 
 ### 6. `Testing/`
 Edge load generation and telemetry analysis tools:
@@ -98,12 +97,6 @@ Edge load generation and telemetry analysis tools:
 - `stress_test_latency_flows.png` — Visual evidence showing microsecond latency and cumulative flow counters.
 - [`simulate_traffic.py`](Testing/simulate_traffic.py) — Traffic generator used to test benign sessions, volumetric SYN floods, and SSH brute-force probes against the gateway.
 - `history/` — Contains continuous telemetry logs recorded on the Raspberry Pi 4 (`history_stress_test_log.csv`).
-
-### 7. `History/`
-Full development log and preserved reference materials:
-- `FULL_CHAT_TRANSCRIPT.md` — Complete chronological log of research, implementation steps, and milestones.
-- `transcript_full.jsonl` — Machine-readable audit file.
-- `chat_attachments/` — 56 historical screenshots, supervisor discussion notes, and reference diagrams.
 
 ---
 

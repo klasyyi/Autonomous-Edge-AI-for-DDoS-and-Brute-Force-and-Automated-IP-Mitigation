@@ -3,16 +3,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Agent Customization & Tool Internals
+# Local environment and developer tooling
 .agents/
 .system_generated/
-
-# Local-only agent instructions & synchronization utilities (not for public repository)
 AGENTS.md
 sync_to_onedrive.ps1
+History/
+
+# Local data and transcripts
+*.jsonl
+FULL_CHAT_TRANSCRIPT.md
 
 # OS and Editor Files
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+

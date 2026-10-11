@@ -1,52 +1,86 @@
-# Viva Defense Notes and Experimental Results
-## 1. Model Accuracy and Operational Performance
+# Viva Defense Notes and Examination Preparation
 
-In my final evaluations, the gateway classifier achieved the following empirical results:
+## 1. Verified Final Results and System Performance
 
-- **Overall Accuracy:** 99.98% (Evaluated on a 20% unseen test split of 132,685 flows)
-- **Average Inference Latency:** ~0.08 ms per flow (well within my project requirement of < 5.0 ms)
-- **CPU Utilization:** Stable at ~20% under sustained volumetric flooding
-- **Autonomous Mitigation:** 100% automated kernel-level dropping via Linux `iptables`
+In my final evaluations across physical hardware and standardized benchmark datasets, my gateway achieved the following empirical results:
 
-### Detailed Classification Metrics
-| Traffic Class | Precision | Recall | F1-Score | Support (Flows) |
-| :--- | :--- | :--- | :--- | :--- |
-| **BENIGN** | 1.00 (100%) | 1.00 (100%) | 1.00 | 106,071 |
-| **DDoS (SYN/HTTP Floods)** | 1.00 (100%) | 1.00 (100%) | 1.00 | 25,478 |
-| **SSH-Patator (Brute-Force)** | 1.00 (100%) | 1.00 (100%) | 1.00 | 1,136 |
+| Metric / Parameter | Value | Validation Context |
+| :--- | :--- | :--- |
+| **Multi-Dataset Accuracy** | **96.70%** (Macro F1: 0.9517) | Evaluated on 23,062 unseen flows spanning CIC-IDS-2017, CSE-CIC-IDS-2018, and CIC-DDoS-2019. |
+| **IoT Benchmark Accuracy** | **97.18%** | Evaluated on 26,592 unseen flows from the physical 105-device `CIC-IoT-2023` testbed. |
+| **Inference Latency** | **0.021 ms / flow** (~47,600 flows/sec) | Compiled pure-Python decision tree execution (`m2cgen`), a 720x speedup over standard Python ML libraries. |
+| **Edge Memory Footprint** | **~24 MB RAM** (10.1% to 11.6% total) | Eliminates numpy, scipy, and scikit-learn on the Raspberry Pi; zero swap space required. |
+| **Compiled Model Size** | **1.05 MB** (`pure_rf_multi.py`) | 25 decision trees constrained to max depth 12, expressed as raw nested `if/else` logic. |
+| **Physical Hardware CPU** | **0.0% to 0.3% CPU** (Idle/Sniffing) | Max burst load reaches ~15% to 20% under high-volume flood conditions. |
+| **Autonomous Mitigation** | **100% Closed-Loop Action** | Directly issues Linux kernel `iptables` drop rules to isolate attacker IP addresses automatically. |
 
----
-
-## 2. Methodology: How I Achieved These Results
-
-When designing the machine learning pipeline for resource-constrained hardware, I made four specific architectural decisions:
-
-1. **Multi-Threat Dataset Integration:**  
-   I combined Friday (DDoS) and Tuesday (SSH-Patator) captures from the CIC-IDS-2017 benchmark to train a robust, multi-class model capable of handling diverse attack patterns.
-
-2. **Feature Space Distillation:**  
-   I reduced the 84 standard network features down to 8 core features (e.g., `Destination Port`, `Fwd Packet Length Mean`, `SYN Flag Count`). This eliminated background noise and significantly lowered computation overhead on the Raspberry Pi.
-
-3. **Pre-Training Class Balancing via SMOTE:**  
-   Because raw network datasets are heavily dominated by benign traffic (>99%), an unmitigated model would be biased. I partitioned the dataset into 80% train and 20% test splits before applying SMOTE, ensuring synthetic samples remained strictly within the training set and eliminating data leakage.
-
-4. **Constrained Model Architecture:**  
-   I configured the Random Forest classifier with `n_estimators = 20` and `max_depth = 10`. This kept memory usage small enough to run fully within RAM on the Raspberry Pi without page swapping.
+### Classification Report on 23,062 Unseen Multi-Year Flows
+```text
+               Precision    Recall    F1-Score    Test Support (Flows)
+───────────────────────────────────────────────────────────────────────
+BENIGN           0.9975     0.9973     0.9974            5,282
+DDoS             0.9987     0.9511     0.9743           14,958
+SSH-Patator      0.7941     0.9950     0.8833            2,822
+───────────────────────────────────────────────────────────────────────
+Accuracy                                0.9670 (96.70%)  23,062
+Macro Avg        0.9301     0.9812     0.9517           23,062
+Weighted Avg     0.9734     0.9670     0.9685           23,062
+```
 
 ---
 
-## 3. Major Engineering Hurdles and My Solutions
+## 2. Key Scientific Narrative: Resolving the Single-Dataset Trap
 
-During development and physical testbed deployment, I resolved three major engineering challenges:
+A central strength of my project defense is demonstrating how I uncovered and resolved **testbed overfitting**:
+
+1. **The Initial 99.98% Result:**  
+   When I initially trained my Random Forest solely on `CIC-IDS-2017`, the model reported 99.98% test accuracy.
+2. **The Zero-Shot Failure (22.64%):**  
+   To verify generalization, I evaluated that 2017 model on unseen traffic from `CSE-CIC-IDS-2018`. The accuracy collapsed to **22.64%**. The model had memorized testbed-specific artifacts (static IP subnets, fixed inter-arrival times, and synthetic background noise) rather than invariant attack behaviors.
+3. **The Multi-Dataset Solution:**  
+   I designed an 8-feature harmonization pipeline merging multi-year captures across 2017, 2018, and 2019 (115,308 flows). Retraining on this harmonized corpus and validating against physical IoT traffic restored generalized accuracy to **96.70%** (multi-year) and **97.18%** (`CIC-IoT-2023`).
+
+---
+
+## 3. High-Yield Viva Examination Questions and Answers
+
+### Q1: Why did you select Random Forest over Deep Learning (CNN/LSTM/Transformers)?
+* **Answer:** Volumetric network attacks require sub-millisecond detection to prevent buffer saturation. Deep neural networks incur heavy matrix multiplications and require large tensor runtimes (PyTorch, TensorFlow) that consume 60% to 95% CPU and hundreds of megabytes of RAM on an ARM Cortex-A72. My constrained Random Forest achieves **96.70% accuracy** with an inference latency of **0.021 ms** and consumes only **~24 MB RAM**, providing the optimal trade-off for edge security.
+
+### Q2: Why compile the model with `m2cgen` into pure Python instead of using TensorFlow Lite or ONNX?
+* **Answer:** TensorFlow Lite and ONNX Runtime require compiling native C++ shared libraries on ARM Linux, which creates toolchain dependencies, ABI version conflicts, and overhead from tensor memory conversions. `m2cgen` decompiles the decision trees into pure mathematical Python `if/else` branching logic (`pure_rf_multi.py`, 1.05 MB). This runs on bare `python3` with zero external dependencies and eliminates the 15 ms numpy array validation delay, achieving a 720x speedup.
+
+### Q3: How did you ensure your high accuracy is not caused by data leakage?
+* **Answer:** I enforced three strict controls:
+  1. I partitioned the dataset into an 80% training set and a 20% test set *before* performing any data augmentation or balancing.
+  2. I applied SMOTE oversampling *exclusively* to the 80% training partition, ensuring synthetic attack vectors never leaked into the validation set.
+  3. The 20% test fold consists entirely of untouched natural network traffic.
+
+### Q4: How does the gateway bridge live network packets to machine learning in real time?
+* **Answer:** Raw network interfaces receive individual packets, whereas ML models evaluate completed flow statistics. I implemented an asynchronous raw socket sniffer that extracts Layer 3 and Layer 4 headers in user space and updates an in-memory **Bidirectional Flow Table** keyed by the 5-tuple `(Src IP, Dst IP, Src Port, Dst Port, Protocol)`. The engine tracks inter-arrival times, window advertisements, and packet counts, triggering TinyML inference every 5 packets while evicting inactive sessions via an automatic TTL mechanism to prevent memory growth.
+
+### Q5: How does the system prevent an attacker from bypassing detection using ephemeral port randomization?
+* **Answer:** Attack tools like `hping3` generate a new randomized source port for every packet during SYN floods. To prevent flow fragmentation across thousands of ephemeral ports, my gateway aggregates connection metrics at the **Source IP level** during volumetric flood evaluations. This aggregates all randomized packets from the attacking host into a unified flow context, allowing the model to detect and block the attack within the first 5 packets.
+
+### Q6: How does the gateway mitigate attacks autonomously without human intervention?
+* **Answer:** Upon detecting a malicious flow with high confidence, the gateway issues a Linux kernel firewall rule:
+  ```bash
+  iptables -I INPUT -s <Attacker_IP> -j DROP
+  ```
+  Additionally, an in-memory early-exit filter immediately discards subsequent packets from blocked IPs in user space, preventing Scapy raw socket queues from saturating system CPU.
+
+---
+
+## 4. The 3 Hardest Engineering Hurdles and My Solutions
 
 ### Hurdle 1: The 15 ms Framework Overhead
-- **The Problem:** In my initial live tests on the Raspberry Pi 4, inference latency was approximately 15 ms per flow, exceeding my project requirement of < 5 ms. Profiling showed that the decision tree mathematics was fast, but Scikit-Learn internal validation checks and NumPy conversions introduced substantial overhead on ARM.
-- **My Solution:** I used `m2cgen` to compile the trained Scikit-Learn Random Forest model into native Python conditional statements (`pure_rf_v2.py`). Bypassing the Scikit-Learn framework cut inference latency from 15 ms down to 0.08 ms (a 180x speedup), with zero external dependencies.
+* **Problem:** Standard Scikit-Learn `.pkl` models required ~15.20 ms per flow on the Raspberry Pi 4 due to numpy array memory allocation and type checking on ARM.
+* **Solution:** I cross-compiled the model into pure Python conditional logic (`pure_rf_multi.py`, 1.05 MB). Bypassing the Scikit-Learn framework cut latency to **0.021 ms** (a 720x speedup) with zero third-party dependencies.
 
-### Hurdle 2: State-Exhaustion Bypass During Volumetric Flooding
-- **The Problem:** When running SYN flood tests using `hping3`, the attack tool randomized the client source port on every packet. Traditional flow tracking relies on a 5-tuple (source IP, source port, destination IP, destination port, protocol). Because every packet had a new source port, the gateway created thousands of single-packet flow entries instead of one cumulative flow, which allowed the attacker to bypass my 5-packet evaluation threshold.
-- **My Solution:** I adapted the flow-tracking architecture. For volumetric flood mitigation, I aggregated packets at the source IP level rather than per ephemeral port. This aggregated all randomized packets from the attacking host into a unified flow context, allowing the model to detect and block the attack within the first 5 packets.
+### Hurdle 2: Ephemeral Port Randomization During SYN Floods
+* **Problem:** In SYN flood attacks, randomized client source ports created thousands of single-packet flow entries, bypassing the 5-packet evaluation threshold.
+* **Solution:** I implemented source-IP aggregation for high-rate connection attempts, consolidating randomized packets from the same host into a unified flow context for immediate detection.
 
-### Hurdle 3: Layer 2 vs. Layer 3 Packet Queuing in Scapy
-- **The Problem:** During high-rate packet floods, the dashboard continued processing packets for 3 to 4 minutes even after `iptables` had already dropped the attacking IP at the Linux kernel level. This occurred because Scapy operates via raw sockets at Layer 2 (Data Link layer), capturing packets before the Linux kernel `iptables` firewall drops them at Layer 3 (Network layer). Scapy was consuming CPU cycles analyzing dropped traffic.
-- **My Solution:** I implemented an in-memory early-exit filter in user space. By maintaining a set of currently blocked IP addresses and checking `if src_ip in blocked_ips: return` as the first step of the packet callback, the packet is instantly discarded before extracting features or updating flow tables. This allowed the gateway to sustain high-rate floods at ~20% CPU utilization without crashing.
+### Hurdle 3: Layer 2 vs. Layer 3 Packet Queuing Overhead
+* **Problem:** Scapy captures packets at Layer 2 (Data Link layer) before the Linux kernel `iptables` firewall drops them at Layer 3 (Network layer). As a result, the packet sniffer continued processing packets from dropped IPs, wasting CPU cycles.
+* **Solution:** I implemented an in-memory early-exit set: `if src_ip in blocked_ips: return`. This drops packets immediately before feature extraction, keeping CPU utilization stable at **0.0% to 0.3%** under routine conditions and ~15% to 20% during peak bursts.

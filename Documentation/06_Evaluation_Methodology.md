@@ -1,98 +1,143 @@
-# Machine Learning Evaluation Methodology
+# Machine Learning Evaluation Methodology and Experimental Design
+
 ## 1. Overview and Research Objective
 
-In this project, my objective was to design, train, and validate a multi-threat intrusion detection model capable of classifying live network flows into three distinct categories:
-1. **`BENIGN`**: Normal network traffic (web browsing, DNS, SSH management).
-2. **`DDoS`**: Volumetric and application-layer denial-of-service traffic (SYN floods, HTTP GET floods).
-3. **`SSH-Patator`**: Brute-force credential guessing attacks directed against Port 22.
+In this project, my objective was to design, train, evaluate, and deploy an autonomous Network Intrusion Detection System (NIDS) running on a physical **Raspberry Pi 4 Model B (Quad-Core ARM Cortex-A72 @ 1.5 GHz, 4GB RAM)**.
 
-To deploy on my resource-constrained **Raspberry Pi 4 (ARM Cortex-A72)**, I enforced a strict **TinyML constraint**: the classifier must execute in sub-millisecond time (< 0.10 ms) without requiring heavyweight runtime libraries (`scikit-learn`, `numpy`, or `pandas`).
+The classification engine identifies network traffic flows into three distinct behavioral classes:
+1. **`BENIGN`**: Legitimate network sessions (HTTP/HTTPS web browsing, DNS queries, legitimate SSH administration).
+2. **`DDoS`**: Volumetric and application-layer denial-of-service traffic (TCP SYN floods, UDP packet storms, HTTP GET floods).
+3. **`SSH-Patator`**: Brute-force credential guessing probes directed against Port 22.
 
----
-
-## 2. Dataset Synthesis and Data Cleaning
-
-I assembled the training corpus by integrating two distinct day captures from the benchmark CIC-IDS-2017 dataset:
-- **Friday Afternoon Capture:** Contains real-world benign baseline traffic along with LOIC and synthetic volumetric DDoS attacks (`Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv`).
-- **Tuesday Capture:** Contains benign background activity alongside automated SSH brute-force attacks (`Tuesday-WorkingHours.pcap_ISCX.csv`).
-
-### Data Cleaning Protocol:
-1. **Header Sanitization:** I stripped column labels of leading and trailing whitespace artifacts (`df.columns.str.strip()`).
-2. **Infinite and Missing Value Elimination:** Flow calculation tools compute infinite rates when flow durations approach zero. I replaced all `np.inf` and `-np.inf` values with `np.nan` and dropped them:
-   $$\text{DropRows}(X) \iff \exists j \text{ s.t. } X_{i,j} \in \{\text{NaN}, \infty, -\infty\}$$
-3. **Class Isolation:** I filtered the dataset to retain only my targeted evaluation classes: `['BENIGN', 'DDoS', 'SSH-Patator']`.
+### The TinyML Edge Constraint
+Deploying machine learning models directly onto embedded edge nodes introduces strict operational constraints:
+- **Sub-Millisecond Latency:** Inference must execute in under 0.10 ms per flow to avoid packet backlog during traffic bursts.
+- **Dependency Elimination:** Heavy runtime libraries (`scikit-learn`, `numpy`, `scipy`, `pandas`) must be eliminated from the edge environment to avoid runtime conflicts and multi-hundred-megabyte disk overhead.
+- **Low Memory Footprint:** The classification process must operate within minimal system RAM (~24 MB) without inducing memory paging.
 
 ---
 
-## 3. Feature Selection (The 8 Core Features)
+## 2. Experimental Evolution: Two-Phase Methodology
 
-Rather than evaluating all 84 raw features—which induces severe memory swapping on ARM processors—I conducted feature importance analysis and distilled the flow space down to **8 core mathematical features**:
+To ensure scientific validity, I conducted my research across two distinct phases:
 
-| Feature Name | Type | Mathematical and Networking Rationale |
-| :--- | :---: | :--- |
-| **`Destination Port`** | Integer | Discriminates service targets (e.g., Port 22 for SSH-Patator, Port 80/443 for HTTP DDoS, ephemeral ports). |
-| **`Bwd Packet Length Std`** | Float ($\mu s$) | Standard deviation of response payload sizes. In volumetric floods, the server rarely responds, driving this value toward 0. |
-| **`SYN Flag Count`** | Integer | Counts synchronization handshake packets; volumetric SYN floods exhibit abnormally high ratios relative to ACK packets. |
-| **`Flow IAT Mean`** | Float ($\mu s$) | Mean packet Inter-Arrival Time within the flow. Automated botnets fire packets in rapid bursts (< 1000 $\mu s$), whereas human activity exhibits variable pauses. |
-| **`Total Fwd Packets`** | Integer | Cumulative count of outbound packets transmitted by the source IP. |
-| **`Flow Duration`** | Float ($\mu s$) | Total lifetime of the bidirectional TCP session. |
-| **`Fwd Packet Length Mean`** | Float (Bytes) | Average payload size of client packets. Brute-force probes send small, repetitive authentication strings. |
-| **`Init_Win_bytes_forward`** | Integer | Size of initial TCP window advertisement, acting as an OS/client network stack fingerprint. |
+### Phase 1: Baseline Single-Dataset Investigation and Discovery of Testbed Bias
+In my initial experiments, I trained a 20-tree Random Forest classifier (`pure_rf_v2.py`) solely on the **CIC-IDS-2017** benchmark. While this model achieved **99.98% accuracy** and 0.08 ms latency when evaluated against a 20% holdout split of CIC-IDS-2017 (132,685 flows), evaluating it against unseen traffic from **CSE-CIC-IDS-2018** resulted in an immediate collapse to **22.64% accuracy**.
+
+**Root Cause Analysis:** Single-dataset training caused the decision boundaries to overfit to static laboratory artifacts—such as fixed subnet IP ranges, synthetic inter-arrival time constants, and uniform background traffic—rather than learning invariant protocol signatures.
+
+### Phase 2: Universal Multi-Dataset Harmonization and Physical IoT Validation
+To eliminate testbed bias, I engineered a cross-dataset feature harmonization pipeline combining three benchmark years (**CIC-IDS-2017**, **CSE-CIC-IDS-2018**, and **CIC-DDoS-2019**), yielding a unified corpus of **115,308 network flows**. I then validated the resulting model against **26,592 flows from the physical 105-device `CIC-IoT-2023` testbed**, establishing true cross-dataset generalization.
 
 ---
 
-## 4. Train/Test Separation and Class Balancing (SMOTE)
+## 3. Mathematical Formulations of Evaluation Metrics
 
-### Data Leakage Prevention Guarantee
-A critical requirement in my methodology was avoiding data leakage. If over-sampling techniques like SMOTE are executed before dataset partitioning, synthetic samples bleed into the test set, creating artificially inflated metrics.
+To evaluate model performance objectively across balanced and imbalanced traffic conditions, I formulated the evaluation metrics as follows:
 
-1. **Partitioning:** I strictly partitioned the dataset prior to any data transformation:
-   - **Training Set (80%):** 530,738 flows
-   - **Unseen Testing Vault (20%):** 132,685 flows
-   - I locked the random seed to `random_state = 42` for exact reproducibility.
-2. **Subsampling:** To prevent majority-class domination and excessive memory consumption during synthetic calculation, I capped the `BENIGN` training pool at 50,000 samples.
-3. **SMOTE Execution:** I applied the Synthetic Minority Over-sampling Technique (SMOTE) exclusively to the training split:
-   $$x_{new} = x_i + \lambda \times (x_{zi} - x_i), \quad \lambda \sim U(0, 1)$$
-   This generated synthetic feature vectors for `DDoS` and `SSH-Patator` solely within the training domain.
-4. **Validation Integrity:** My 20% test fold remained untouched, containing 100% natural, unaugmented network traffic.
+Let $TP$ denote True Positives, $FP$ False Positives, $TN$ True Negatives, and $FN$ False Negatives for a given class $c \in C$:
+
+### 1. Classification Accuracy
+$$\text{Accuracy} = \frac{\sum_{c \in C} TP_c}{\sum_{c \in C} (TP_c + FP_c + TN_c + FN_c)}$$
+
+### 2. Precision
+$$\text{Precision}_c = \frac{TP_c}{TP_c + FP_c}$$
+High precision in network security ensures legitimate user connections are not falsely flagged or blocked by `iptables`.
+
+### 3. Recall (Detection Rate)
+$$\text{Recall}_c = \frac{TP_c}{TP_c + FN_c}$$
+High recall ensures malicious intrusions are detected reliably without evading perimeter defenses.
+
+### 4. F1-Score (Harmonic Mean)
+$$F_1 = 2 \times \frac{\text{Precision}_c \times \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}$$
+
+### 5. Macro-Averaged F1-Score
+$$\text{Macro } F_1 = \frac{1}{|C|} \sum_{c \in C} F_{1, c}$$
+Macro F1 assigns equal weight to all classes, ensuring minority attack categories (e.g., SSH-Patator) are evaluated with equal rigor to majority Benign traffic.
 
 ---
 
-## 5. Model Architecture and TinyML Compilation
+## 4. Feature Selection and Harmonization (The 8 Core Features)
+
+Rather than evaluating all 80+ features from raw PCAP captures—which causes severe CPU caching delays on ARM hardware—I analyzed feature importance across all three datasets and distilled the flow vector down to **8 core mathematical features**:
+
+| # | Harmonized Feature Name | Data Type | Units | Physical Network Rationale |
+| :-: | :--- | :---: | :---: | :--- |
+| **1** | `Destination Port` | Integer | - | Discriminates service targets (Port 22 for SSH brute-force, Port 80/443 for web DDoS, ephemeral ports). |
+| **2** | `Bwd Packet Length Std` | Float | Bytes | Standard deviation of response payload sizes. In volumetric floods, the victim rarely responds, driving this value toward 0. |
+| **3** | `SYN Flag Count` | Integer | - | Counts synchronization handshake packets; volumetric SYN floods exhibit abnormally high ratios relative to ACK packets. |
+| **4** | `Flow IAT Mean` | Float | $\mu s$ | Mean packet Inter-Arrival Time within the flow. Automated attack scripts transmit at rapid intervals (< 1000 $\mu s$), whereas human activity exhibits variable pauses. |
+| **5** | `Total Fwd Packets` | Integer | - | Cumulative count of outbound packets transmitted by the source IP. |
+| **6** | `Flow Duration` | Float | $\mu s$ | Total lifetime of the bidirectional TCP session. |
+| **7** | `Fwd Packet Length Mean` | Float | Bytes | Average payload size of client packets. Brute-force probes send small, repetitive authentication strings. |
+| **8** | `Init_Win_bytes_forward` | Integer | Bytes | Size of initial TCP window advertisement, acting as an OS/client network stack fingerprint. |
+
+---
+
+## 5. Data Leakage Prevention and Class Balancing (SMOTE)
+
+### Strict Train/Test Separation Protocol
+A frequent methodological flaw in published literature is applying data normalization or oversampling across the entire dataset prior to partitioning. This bleeds statistical patterns and synthetic test samples into the training set, producing invalid accuracy claims.
+
+To eliminate data leakage, I enforced a strict protocol:
+1. **Pre-Split Partitioning:** The complete harmonized dataset (115,308 flows) was stratified into an **80% training set (92,246 flows)** and a **20% unseen test vault (23,062 flows)** using a locked seed (`random_state = 42`).
+2. **Strict Training-Fold Oversampling:** The Synthetic Minority Over-sampling Technique (SMOTE) was executed **exclusively on the 80% training fold**:
+   $$x_{\text{new}} = x_i + \lambda \times (x_{zi} - x_i), \quad \lambda \sim U(0, 1)$$
+   This balanced the minority classes (`DDoS` and `SSH-Patator`) up to 59,831 samples each within the training partition.
+3. **Pristine Test Vault:** The 20% test fold remained 100% untouched, consisting solely of natural, unaugmented network traffic.
+
+---
+
+## 6. Model Architecture and TinyML Compilation
 
 ### Hyperparameter Bounds
-- **Classifier:** `RandomForestClassifier`
-- `n_estimators = 20`: Selected via grid search to balance ensemble diversity against inference latency.
-- `max_depth = 10`: Enforced to bound the depth of binary splits, preventing memorization of source IP addresses or transient timestamps.
-- `n_jobs = -1`: Utilized all available CPU cores during offline training.
+I trained a constrained `RandomForestClassifier` with the following bounded parameters:
+- `n_estimators = 25`: Selected to provide sufficient ensemble variance reduction while keeping the compiled file size to 1.05 MB.
+- `max_depth = 12`: Constrained to prevent individual tree branches from memorizing specific host IP addresses or transient timestamps.
+- `criterion = 'gini'`: Gini impurity metric for splitting criteria.
 
-### Cross-Compilation with `m2cgen`
-I cross-compiled the trained Scikit-Learn model via `m2cgen` into native Python (`pure_rf_v2.py`):
-- Converts binary decision trees into nested conditional expressions (`if/else`).
-- Eliminates all dependency on `numpy`, `scipy`, and `scikit-learn` on the Raspberry Pi.
-- Slashes per-flow classification latency to **0.08 ms**.
+### Compilation to Pure Python (`pure_rf_multi.py`)
+Using `m2cgen`, I cross-compiled the trained ensemble into pure Python branching code:
+- Converts all 25 decision trees into deterministic nested `if/else` statements.
+- **Zero Runtime Dependencies:** Requires bare Python 3 with no imports of `numpy`, `scipy`, or `scikit-learn` on the edge gateway.
+- **Compiled File Size:** Exactly **1.05 MB**.
+- **Inference Latency:** **0.021 ms per flow** (~47,600 classifications per second).
+- **RAM Footprint:** **~24 MB RAM** (only 10.1% to 11.6% of system memory on the Raspberry Pi 4).
 
 ---
 
-## 6. Formal Evaluation Results
+## 7. Formal Experimental Evaluation Results
 
-Evaluated against my **20% unseen test split (132,685 real-world flows)**:
+### A. Universal Multi-Dataset Evaluation (23,062 Unseen Flows)
+Evaluated across unseen test flows spanning CIC-IDS-2017, CSE-CIC-IDS-2018, and CIC-DDoS-2019:
 
-### Classification Report:
-```text
-               precision    recall  f1-score   support
+| Traffic Class | Precision | Recall | F1-Score | Support (Flows) |
+| :--- | :---: | :---: | :---: | :---: |
+| **BENIGN** | 0.9975 | 0.9973 | 0.9974 | 5,282 |
+| **DDoS** | 0.9987 | 0.9511 | 0.9743 | 14,958 |
+| **SSH-Patator** | 0.7941 | 0.9950 | 0.8833 | 2,822 |
+| **Overall Accuracy** | - | - | **0.9670 (96.70%)** | **23,062** |
+| **Macro Average** | **0.9301** | **0.9812** | **0.9517** | **23,062** |
+| **Weighted Average** | **0.9734** | **0.9670** | **0.9685** | **23,062** |
 
-      BENIGN       1.00      1.00      1.00    106071
-        DDoS       1.00      1.00      1.00     25478
- SSH-Patator       0.99      1.00      1.00      1136
+- **Multi-Dataset Accuracy:** **96.70%** across multi-year unseen network traffic.
+- **Benign Traffic Reliability:** **99.74% F1-score**, ensuring legitimate traffic is preserved without false drops.
+- **Brute-Force Recall:** **99.50%**, ensuring credential-guessing attacks are captured reliably.
 
-    accuracy                           1.00    132685
-   macro avg       1.00      1.00      1.00    132685
-weighted avg       1.00      1.00      1.00    132685
-```
+### B. Dedicated Physical IoT Testbed Evaluation (`CIC-IoT-2023`)
+Evaluated on **26,592 unseen flows** collected from 105 physical smart home and edge devices:
+- **Overall IoT Accuracy:** **97.18%**
+- **DDoS Precision / Recall / F1:** **1.00 / 1.00 / 1.00**
+- **Benign Precision / Recall / F1:** **0.97 / 0.94 / 0.95**
 
-- **Overall Accuracy:** **99.98%**
-- **Macro Precision:** 0.997 (~1.00)
-- **Macro Recall:** 0.999 (~1.00)
-- **Macro F1-Score:** 0.998 (~1.00)
-- **Average Inference Latency:** **0.08 ms per flow**
+### C. Summary Performance Across Model Iterations
+
+| Metric / Parameter | Phase 1 Baseline (`pure_rf_v2`) | Phase 2 Multi-Dataset (`pure_rf_multi`) | Physical IoT Benchmark |
+| :--- | :---: | :---: | :---: |
+| **Training Corpus** | CIC-IDS-2017 Only | 2017 + 2018 + 2019 Unified | CIC-IoT-2023 Testbed |
+| **Overall Accuracy** | 99.98% (2017) / 22.64% (2018 transfer) | **96.70%** (Robust Generalization) | **97.18%** |
+| **Macro F1-Score** | 1.00 (same-domain) / 0.29 (cross-domain) | **0.9517** | 0.79 / 0.96 (per-class) |
+| **Inference Latency** | 0.080 ms / flow | **0.021 ms / flow** | **0.021 ms / flow** |
+| **Compiled Model Size** | 0.84 MB | **1.05 MB** | **1.05 MB** |
+| **Edge RAM Footprint** | ~24 MB | **~24 MB** | **~24 MB** |
+| **External Dependencies** | None (Pure Python) | **None (Pure Python)** | **None (Pure Python)** |

@@ -12,6 +12,7 @@ In this project, I developed an autonomous, low-power Edge-AI Security Gateway d
 - **Operating System:** Debian GNU/Linux (Linux kernel aarch64)
 - **Benchmark Datasets:** CIC-IDS-2017, CSE-CIC-IDS-2018, CIC-DDoS-2019, and CIC-IoT-2023
 - **Classification Engine:** Constrained Random Forest cross-compiled into pure dependency-free Python code via `m2cgen`
+- **Compiled Model Size:** 1.05 MB standalone pure-Python file (`pure_rf_multi.py`, zero external dependencies)
 - **Inference Latency:** 0.021 ms per flow calculation (~47,600 flows/second)
 - **Multi-Dataset Accuracy:** 96.70% across 23,062 unseen multi-year test flows
 - **IoT Benchmark Accuracy:** 97.18% evaluated on the 105-device physical `CIC-IoT-2023` testbed

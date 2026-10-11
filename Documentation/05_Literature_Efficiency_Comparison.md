@@ -16,7 +16,7 @@ Rather than relying on theoretical comparisons, every benchmark cited in this do
 | **Amuthadevi et al.** [3] | *Sustainable Energy*, 2024 | Energy-Constrained IoT Edge Devices | TinyML (Random Forest, AdaBoost) | **~10 – 50 ms** window on MCU | Constrained power; traditional RF incurs memory overhead on MCUs | 99.39% Accuracy<br>99.45% F1-score | [`Amuthadevi2024_TinyML_IoT_IDS.pdf`](../Publications/Amuthadevi2024_TinyML_IoT_IDS.pdf) |
 | **Hafid & Ezzouhairi** [4] | *IEEE Conference*, 2024 | IoT Edge Gateway Architecture | Random Forest, Decision Tree | **15 – 35 ms** flow ingestion | High edge memory cited without model compression | 86.0% Accuracy<br>89.0% Recall | [`Hafid2024_IEEE_IoT_Edge_IDS.pdf`](../Publications/Hafid2024_IEEE_IoT_Edge_IDS.pdf) |
 | **Standard Edge Python Deployment** [5] | Local Benchmark Baseline | Raspberry Pi 4 Model B (ARM Cortex-A72) | Standard Scikit-Learn `.pkl` Random Forest | **15.20 ms** per flow *(Framework overhead)* | **25% – 35% CPU**<br>140 – 180 MB RAM | 99.98% Accuracy | [`history_findings_and_tradeoffs.txt`](history/history_findings_and_tradeoffs.txt) (Local test log) |
-| **My Project (Autonomous Gateway)** | **Current FYP Implementation** | **Raspberry Pi 4 Model B (ARM Cortex-A72)** | **Compiled Pure RF (`m2cgen`) + Deterministic L4 Filter** | **0.021 ms** per flow (~47,600 flows/sec) | **0.0% – 0.3% Idle CPU** (Peak 15% during burst)<br>**~24 MB RAM** | **96.70% Multi-Dataset**<br>**97.18% IoT Accuracy** | Live Prototype ([`Gateway/dashboard.py`](../Gateway/dashboard.py) and [`Gateway/pure_rf_multi.py`](../Gateway/pure_rf_multi.py)) |
+| **My Project (Autonomous Gateway)** | **Current FYP Implementation** | **Raspberry Pi 4 Model B (ARM Cortex-A72)** | **Compiled Pure RF (`m2cgen`) + Deterministic L4 Filter** | **0.021 ms** per flow (~47,600 flows/sec) | **0.0% – 0.3% Idle CPU** (Peak 15% during burst)<br>**~24 MB RAM**, **1.05 MB Model** | **96.70% Multi-Dataset**<br>**97.18% IoT Accuracy** | Live Prototype ([`Gateway/dashboard.py`](../Gateway/dashboard.py) and [`Gateway/pure_rf_multi.py`](../Gateway/pure_rf_multi.py)) |
 
 ---
 
@@ -42,7 +42,7 @@ Rather than relying on theoretical comparisons, every benchmark cited in this do
 ## 4. Key Innovations in My Architecture
 
 ### Innovation 1: Overcoming the 15 ms Python Framework Bottleneck
-When running standard scikit-learn `.pkl` models on the Raspberry Pi 4, inference required approximately 15.20 ms per sample. Profiling demonstrated that the matrix mathematics completed in under 0.1 ms, but Python spent over 15 ms performing numpy array shape validation and dynamic type checking on ARM. By cross-compiling the model into pure Python `if/else` logic (`pure_rf_multi.py`), I eliminated all framework overhead and achieved **0.021 ms latency**.
+When running standard scikit-learn `.pkl` models on the Raspberry Pi 4, inference required approximately 15.20 ms per sample. Profiling demonstrated that the matrix mathematics completed in under 0.1 ms, but Python spent over 15 ms performing numpy array shape validation and dynamic type checking on ARM. By cross-compiling the model into pure Python `if/else` logic (`pure_rf_multi.py`, 1.05 MB), I eliminated all framework overhead and achieved **0.021 ms latency**.
 
 ### Innovation 2: Two-Tier Hybrid Layer-4 / Layer-7 Pipeline
 To prevent volumetric SYN floods from exhausting edge memory, I designed a deterministic pre-filter ahead of the machine learning classifier:

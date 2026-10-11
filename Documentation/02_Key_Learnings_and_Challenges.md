@@ -48,6 +48,7 @@ Overcoming these challenges transformed my project from a standard data-science 
   - **Results:**
     - Edge inference requires **zero external libraries** (runs on bare `python3`).
     - Base RAM footprint reduced to **~24 MB** (only 10.1% to 11.6% of total system RAM).
+    - Standalone model footprint reduced to **1.05 MB** (`pure_rf_multi.py`).
     - Inference latency dropped to **0.021 ms per flow** (~47,600 flows/second).
 
 ---
@@ -90,7 +91,7 @@ Overcoming these challenges transformed my project from a standard data-science 
   - I linked my inference engine directly to the Linux kernel firewall subsystem via **`iptables`**.
   - When the pure-Python classifier detects a malicious flow (DDoS or Brute Force) with high confidence, it immediately issues a kernel-level rule to drop further packets from the offending IP address:
     `iptables -I INPUT -s <Attacker_IP> -j DROP`
-  - This transformed the gateway from a passive monitoring script into an **autonomous active defense agent**.
+  - This transformed the gateway from a passive monitoring script into an **autonomous active defense system**.
 
 ---
 

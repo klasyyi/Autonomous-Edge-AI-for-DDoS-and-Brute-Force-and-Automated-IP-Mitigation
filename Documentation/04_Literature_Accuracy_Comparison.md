@@ -67,4 +67,5 @@ I deliberately bounded the model architecture:
 - `n_estimators = 25` (prevents memory bloat)
 - `max_depth = 12` (prevents memorization of leaf samples)
 - Input space constrained to **8 core statistical features**
-This model was compiled into pure, dependency-free Python (`pure_rf_multi.py`), consuming only 24 MB RAM on the Raspberry Pi 4.
+- Model footprint: **1.05 MB** standalone pure-Python code (`pure_rf_multi.py`)
+This compiled model runs with zero external dependencies, consuming only **~24 MB RAM** and achieving **0.021 ms inference latency** on the Raspberry Pi 4.

@@ -44,7 +44,7 @@ I synthesized a multi-dataset corpus of **115,308 network flows**:
 ### Training Methodology
 * **Stratified 80/20 Partition:** 92,246 training flows | 23,062 unseen test flows.
 * **SMOTE Balancing:** Applied strictly to the training fold (59,831 balanced flows per class).
-* **Constrained TinyML Architecture:** `RandomForestClassifier(n_estimators=25, max_depth=12)` compiled via `m2cgen` into raw Python logic (`pure_rf_multi.py`).
+* **Constrained TinyML Architecture:** `RandomForestClassifier(n_estimators=25, max_depth=12)` compiled via `m2cgen` into raw Python logic (`pure_rf_multi.py`, **1.05 MB** file size, **~24 MB RAM** footprint).
 
 ### Formal Test Results on 23,062 Unseen Multi-Year Flows:
 ```text
@@ -80,12 +80,12 @@ To test performance against real physical IoT network traffic, I evaluated my Ti
 
 ## 5. Performance Comparison: Single-Dataset vs. Multi-Dataset
 
-| Model Architecture | Training Data | Evaluation Target | Accuracy | Macro F1-Score | Inference Latency on Pi 4 |
-| :--- | :--- | :--- | :---: | :---: | :---: |
-| **Baseline Model (`pure_rf_v2`)** | CIC-IDS-2017 Only | CIC-IDS-2017 (Same distribution) | **99.98%** | 1.00 | 0.08 ms |
-| **Baseline Model (`pure_rf_v2`)** | CIC-IDS-2017 Only | CSE-CIC-IDS2018 (Unseen cross-testbed) | **22.64%** *(Overfitting failure)* | 0.30 | 0.08 ms |
-| **Universal Multi-Model (`pure_rf_multi`)** | **2017 + 2018 + 2019** | **Merged Unseen Test Vault (All 3 Datasets)** | **96.70%** *(Robust Generalization)* | **0.95** | **0.021 ms** |
-| **IoT Edge Model** | CIC-IoT2023 Only | CIC-IoT2023 Unseen Test Vault | **97.18%** | 0.79 | 0.021 ms |
+| Model Architecture | Training Data | Evaluation Target | Accuracy | Macro F1-Score | Latency on Pi 4 | Model Size & RAM |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **Baseline Model (`pure_rf_v2`)** | CIC-IDS-2017 Only | CIC-IDS-2017 (Same distribution) | **99.98%** | 1.00 | 0.08 ms | 0.84 MB / ~24 MB |
+| **Baseline Model (`pure_rf_v2`)** | CIC-IDS-2017 Only | CSE-CIC-IDS2018 (Unseen cross-testbed) | **22.64%** *(Overfitting failure)* | 0.30 | 0.08 ms | 0.84 MB / ~24 MB |
+| **Universal Multi-Model (`pure_rf_multi`)** | **2017 + 2018 + 2019** | **Merged Unseen Test Vault (All 3 Datasets)** | **96.70%** *(Robust Generalization)* | **0.95** | **0.021 ms** | **1.05 MB / ~24 MB** |
+| **IoT Edge Model** | CIC-IoT2023 Only | CIC-IoT2023 Unseen Test Vault | **97.18%** | 0.79 | 0.021 ms | **1.05 MB / ~24 MB** |
 
 This empirical comparison demonstrates three key findings:
 1. The initial 99.98% accuracy score was specific to single-testbed conditions.
