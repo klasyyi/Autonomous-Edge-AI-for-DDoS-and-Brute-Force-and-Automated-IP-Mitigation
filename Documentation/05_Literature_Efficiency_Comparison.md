@@ -1,11 +1,4 @@
 # Academic Literature Benchmarking: Hardware Efficiency and Edge Resource Metrics
-
-> **Author:** Final Year Project Student (Computer Science / Cyber Security)  
-> **Hardware Platform:** Raspberry Pi 4 Model B (Quad-Core ARM Cortex-A72 @ 1.5GHz, 4GB LPDDR4)  
-> **Measured Performance:** 0.021 ms Inference Latency, 0.0% to 0.3% Idle/Sniffing CPU, ~24 MB Total Gateway RAM
-
----
-
 ## 1. Executive Summary
 
 In this report, I provide an empirical, publication-backed comparison of my **Autonomous Edge-AI Security Gateway** against published research papers that evaluated intrusion detection systems on edge hardware (Raspberry Pi, microcontrollers) and cloud environments.
