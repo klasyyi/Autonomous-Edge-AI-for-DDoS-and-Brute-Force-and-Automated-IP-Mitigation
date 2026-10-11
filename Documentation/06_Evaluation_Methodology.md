@@ -1,13 +1,4 @@
 # Machine Learning Evaluation Methodology
-
-**Project:** Autonomous TinyML Edge-Security Gateway  
-**Author:** Final Year Project Candidate  
-**Model Architecture:** Constrained Random Forest (`n_estimators=20`, `max_depth=10`)  
-**Cross-Compilation Tool:** `m2cgen` (Model-to-Code Generator)  
-**Primary Dataset:** Canadian Institute for Cybersecurity CIC-IDS-2017 Benchmark  
-
----
-
 ## 1. Overview and Research Objective
 
 In this project, my objective was to design, train, and validate a multi-threat intrusion detection model capable of classifying live network flows into three distinct categories:
