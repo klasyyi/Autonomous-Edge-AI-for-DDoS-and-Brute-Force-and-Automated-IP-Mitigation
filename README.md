@@ -1,11 +1,4 @@
 # Autonomous Edge-AI for DDoS and Brute-Force Detection with Automated IP Mitigation
-
-> **Author:** Final Year Project (Computer Science / Cyber Security)  
-> **Platform:** Raspberry Pi 4 Model B (4GB RAM)  
-> **Target Scope:** Autonomous, lightweight Network Intrusion Detection System (NIDS) with closed-loop mitigation for IoT and edge networks.
-
----
-
 ## Executive Summary and Key Results
 
 In this project, I designed and implemented an autonomous Edge-AI security gateway. It protects resource-constrained networks from volumetric DDoS floods and SSH brute-force attacks directly at the local network perimeter.
