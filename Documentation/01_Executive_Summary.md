@@ -1,7 +1,5 @@
 # Project Summary: Autonomous Edge-AI Security Gateway
 
----
-
 ## 1. Executive Summary
 
 In this project, I developed an autonomous, low-power Edge-AI Security Gateway deployed on a Raspberry Pi 4 Model B. Designed for Internet of Things (IoT) and edge computing environments, the gateway performs real-time packet sniffing, sliding-window flow feature extraction, TinyML classification, and automated kernel-level firewall mitigation (`iptables`) without requiring cloud connectivity.
