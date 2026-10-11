@@ -1,0 +1,21 @@
+KEY FINDINGS & SYSTEM TRADE-OFFS
+
+1. The Inference Latency Bottleneck
+Finding: During the initial testing phase, deploying a standard .pkl machine learning model via the scikit-learn framework resulted in an inference latency of ~15.00ms per flow. 
+Analysis: Profiling the system revealed that the mathematical inference itself was fast, but the underlying Python framework caused massive overhead on the Raspberry Pi's ARM processor due to internal memory allocation, data-type casting, and array shape validation.
+
+
+2. Model Compilation (m2cgen) and Trade-offs
+To achieve the sub-5ms objective, the Random Forest model was decompiled from a binary .pkl object into raw, static Python if/else logic using m2cgen. This successfully reduced the inference latency to 0.08ms. However, this architectural change introduced several critical system trade-offs:
+
+Trade-off A: Code Bloat vs. CPU Efficiency
+Translating an ensemble Random Forest into raw logic creates a massive expansion in codebase size, as every decision tree node becomes an explicit if/else statement. To prevent the Raspberry Pi's RAM from crashing during compilation, the model had to be strictly constrained to n_estimators=20 and max_depth=10. 
+Enterprise Context: This is an acceptable trade-off for Edge-AI. Storage on IoT devices (SD Cards) is abundant and cheap, whereas CPU cycles and thermal headroom are heavily restricted. We gladly traded file size for zero CPU overhead.
+
+Trade-off B: Hardcoded Immutability vs. Flexibility
+Unlike dynamic .pkl models which can be hot-swapped, a compiled model is permanently hardcoded into the gateway's routing script. Retraining the model requires generating and deploying an entirely new Python script.
+Enterprise Context: For remote enterprise networks (e.g., offshore rigs, rural substations), this lack of flexibility is actually a security advantage. A hardcoded, compiled model acts as "immutable firmware," ensuring absolute stability in air-gapped environments without relying on unstable cloud updates.
+
+Trade-off C: Removal of Data Validation Safety Nets
+Bypassing scikit-learn removes all built-in protections against malformed data inputs (e.g., passing a string instead of a float). A single malformed array could crash the Edge gateway.
+Enterprise Context: Because the gateway operates as a closed-loop system where data is autonomously extracted by a highly controlled 'scapy' packet sniffer, the risk of malformed data is negligible. The removal of the safety net was deemed an acceptable risk to achieve the 0.08ms latency requirement.

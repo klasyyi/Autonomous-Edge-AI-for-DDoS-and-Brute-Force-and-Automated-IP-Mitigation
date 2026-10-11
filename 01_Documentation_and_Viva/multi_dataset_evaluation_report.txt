@@ -1,0 +1,12 @@
+UNIVERSAL MULTI-DATASET MODEL EVALUATION (2017 + 2018 + 2019)
+Overall Accuracy: 96.70%
+
+              precision    recall  f1-score   support
+
+      BENIGN     0.9975    0.9973    0.9974      5282
+        DDoS     0.9987    0.9511    0.9743     14958
+ SSH-Patator     0.7941    0.9950    0.8833      2822
+
+    accuracy                         0.9670     23062
+   macro avg     0.9301    0.9812    0.9517     23062
+weighted avg     0.9734    0.9670    0.9685     23062

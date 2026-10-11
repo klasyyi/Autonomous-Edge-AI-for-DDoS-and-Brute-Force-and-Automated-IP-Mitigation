@@ -1,0 +1,20 @@
+1. Loading original datasets...
+2. Splitting data into 80% Training and 20% Unseen Testing...
+3. Applying SMOTE to balance the 80% Training Data...
+4. Training the Random Forest Model...
+5. Evaluating model strictly against the 20% Unseen Testing Data...
+
+================ RESULTS ================
+Overall Accuracy: 99.98%
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+      BENIGN       1.00      1.00      1.00    106071
+        DDoS       1.00      1.00      1.00     25478
+ SSH-Patator       1.00      1.00      1.00      1136
+
+    accuracy                           1.00    132685
+   macro avg       1.00      1.00      1.00    132685
+weighted avg       1.00      1.00      1.00    132685
+=========================================
