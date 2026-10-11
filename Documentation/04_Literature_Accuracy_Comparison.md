@@ -1,15 +1,5 @@
 # Academic Literature Benchmarking and Accuracy Validation
 ## Cross-Dataset Verification Across CIC-IDS-2017, CSE-CIC-IDS-2018, CIC-DDoS-2019 and CIC-IoT-2023
-
-> **Author:** Final Year Project Student (Computer Science / Cyber Security)  
-> **Project Title:** Autonomous Edge-AI for DDoS and Brute-Force Detection with Automated IP Mitigation  
-> **Evaluated Scores:**
-> - Baseline Model (CIC-IDS-2017): 99.98% Accuracy (Macro F1: 1.00)
-> - Universal Multi-Dataset Model (2017 + 2018 + 2019): 96.70% Accuracy (Macro F1: 0.9517)
-> - Zero-Shot IoT Transfer (CIC-IoT-2023 Physical Devices): 97.18% Accuracy
-
----
-
 ## 1. Executive Summary
 
 In machine learning intrusion detection research, examiners frequently scrutinize high accuracy scores (>95%) to check for data leakage, laboratory testbed bias, or synthetic overfitting.
