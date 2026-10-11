@@ -1,12 +1,5 @@
 # Project File Audit and System Architecture
 ## Autonomous Edge-AI for DDoS and Brute-Force Detection with Automated IP Mitigation
-
-> **Author:** Final Year Project Student (Computer Science / Cyber Security)  
-> **Target Audience:** Project Supervisor, Internal and External Examiners, and Project Reviewers  
-> **Project Scope:** Autonomous, lightweight Network Intrusion Detection System (NIDS) deployed on a Raspberry Pi 4 edge gateway.
-
----
-
 ## 1. Executive Summary
 
 In this project, I designed and built an autonomous Edge-AI security gateway to protect Internet of Things (IoT) and Local Area Network (LAN) devices against Distributed Denial of Service (DDoS) and SSH Brute-Force attacks.
