@@ -1,8 +1,5 @@
 # Key Learnings and Engineering Challenges Overcome
 ## From Theoretical Models to an Autonomous Edge-AI Gateway
-
----
-
 ## Executive Summary: What Makes This Project Unique?
 
 Building an intrusion detection model in an offline Python notebook is straightforward. However, transitioning a machine learning model into an **autonomous, headless, real-time edge security appliance running on physical Raspberry Pi hardware** exposed major real-world engineering bottlenecks that standard machine learning coursework rarely addresses.
