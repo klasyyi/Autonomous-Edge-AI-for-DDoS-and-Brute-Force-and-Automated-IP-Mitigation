@@ -16,7 +16,6 @@ Rather than relying on heavy deep-learning frameworks or offloading sensitive ne
 | :--- | :--- | :--- |
 | **Multi-Dataset Accuracy** | **96.70%** (Macro F1: 0.9517) | Evaluated on 23,062 unseen flows from CIC-IDS-2017, CSE-CIC-IDS-2018, and CIC-DDoS-2019. |
 | **IoT Benchmark Accuracy** | **97.18%** | Evaluated on 26,592 unseen flows from the physical 105-device `CIC-IoT-2023` testbed. |
-| **Supervisor Benchmark Goal** | $> 80.0\%$ | Exceeded by +16.70 percentage points. |
 | **Edge Memory Footprint** | **~24 MB RAM (10.1% of total)** | No C/C++ runtime extensions, numpy, or scikit-learn required on the Raspberry Pi. |
 | **Inference Latency** | **0.021 ms / flow (~47,600 flows/sec)** | Compiled pure-Python decision tree execution via m2cgen. |
 | **Deployment Mode** | Headless Physical Edge Device | Automatically starts on power-on as a Linux systemd background service (`gateway.service`). |
