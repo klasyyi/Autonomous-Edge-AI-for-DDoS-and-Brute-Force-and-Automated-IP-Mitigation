@@ -1,9 +1,5 @@
 # Project Summary: Autonomous Edge-AI Security Gateway
 
-> **Author:** Final Year Project Student (Computer Science / Cyber Security)  
-> **Topic:** Autonomous Edge-AI for DDoS and Brute-Force Detection with Automated IP Mitigation  
-> **Target Hardware:** Raspberry Pi 4 Model B (4GB RAM)
-
 ---
 
 ## 1. Executive Summary
