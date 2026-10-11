@@ -26,16 +26,16 @@ In this document, I provide formal proof and peer-reviewed literature validation
 
 | Reference / Authors | Dataset Evaluated | Classifier Evaluated | Reported Accuracy | Reported F1 / Recall | Physical Proof File in Repo |
 | :--- | :--- | :--- | :---: | :---: | :--- |
-| **Sharafaldin et al.** [1]<br>*(Dataset Creators)* | CIC-IDS-2017 | Random Forest | **99.88%** | 0.99 | [`Sharafaldin2018_CICIDS2017.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Sharafaldin2018_CICIDS2017.pdf) |
-| **Zhou et al.** [2] | CIC-IDS-2017 | Ensemble & Random Forest | **99.88% – 99.97%** | 0.999 | [`Zhou2019_CICIDS2017_Ensemble.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Zhou2019_CICIDS2017_Ensemble.pdf) |
-| **Karim et al.** [3] | **CSE-CIC-IDS2018** | Random Forest (Optimal Features) | **97.80% – 99.20%** | 0.985 | [`Karim2020_CSE_CIC_IDS2018_Features.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Karim2020_CSE_CIC_IDS2018_Features.pdf) |
-| **Almutairi et al.** [4] | **CIC-DDoS2019** | AdaBoost / RF on IoT Nodes | **98.20% – 99.90%** | 0.989 | [`Almutairi2021_CICDDoS2019_IoT_ML.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Almutairi2021_CICDDoS2019_IoT_ML.pdf) |
-| **Awotunde et al.** [5] | **CIC-IoT-2023** | Lightweight ML (Zero-Trust) | **96.50% – 98.40%** | 0.971 | [`Awotunde2024_CICIoT2023_Lightweight_ML.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Awotunde2024_CICIoT2023_Lightweight_ML.pdf) |
-| **Bhandari et al.** [6] | **CIC-IoT-2023** | Resource-Aware RF & XGBoost | **96.80% – 97.90%** | 0.968 | [`Bhandari2026_CICIoT2023_ResourceAware_IDS.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Bhandari2026_CICIoT2023_ResourceAware_IDS.pdf) |
-| **Amuthadevi et al.** [7] | IoT Benchmarks | TinyML Random Forest | **99.39%** | 0.994 | [`Amuthadevi2024_TinyML_IoT_IDS.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Amuthadevi2024_TinyML_IoT_IDS.pdf) |
-| **Ali et al.** [8] | Edge IoT Testbeds | Edge-Native Decision Trees | **96.40% – 98.10%** | 0.970 | [`Ali2025_IEEE_IoT_Edge_IDS.pdf`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/02_Publications_Proof/Ali2025_IEEE_IoT_Edge_IDS.pdf) |
-| **My Unified Model (`pure_rf_multi`)** | **2017 + 2018 + 2019** | **Constrained RF (`pure_rf_multi`)** | **96.70%** | **0.952** | [`pure_rf_multi.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/03_Models_and_Training/pure_rf_multi.py) |
-| **My Physical IoT Evaluation** | **CIC-IoT-2023** | **Constrained RF (`pure_rf_multi`)** | **97.18%** | **0.961** | [`MULTI_DATASET_EVALUATION.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/MULTI_DATASET_EVALUATION.md) |
+| **Sharafaldin et al.** [1]<br>*(Dataset Creators)* | CIC-IDS-2017 | Random Forest | **99.88%** | 0.99 | [`Sharafaldin2018_CICIDS2017.pdf`](../02_Publications_Proof/Sharafaldin2018_CICIDS2017.pdf) |
+| **Zhou et al.** [2] | CIC-IDS-2017 | Ensemble & Random Forest | **99.88% – 99.97%** | 0.999 | [`Zhou2019_CICIDS2017_Ensemble.pdf`](../02_Publications_Proof/Zhou2019_CICIDS2017_Ensemble.pdf) |
+| **Karim et al.** [3] | **CSE-CIC-IDS2018** | Random Forest (Optimal Features) | **97.80% – 99.20%** | 0.985 | [`Karim2020_CSE_CIC_IDS2018_Features.pdf`](../02_Publications_Proof/Karim2020_CSE_CIC_IDS2018_Features.pdf) |
+| **Almutairi et al.** [4] | **CIC-DDoS2019** | AdaBoost / RF on IoT Nodes | **98.20% – 99.90%** | 0.989 | [`Almutairi2021_CICDDoS2019_IoT_ML.pdf`](../02_Publications_Proof/Almutairi2021_CICDDoS2019_IoT_ML.pdf) |
+| **Awotunde et al.** [5] | **CIC-IoT-2023** | Lightweight ML (Zero-Trust) | **96.50% – 98.40%** | 0.971 | [`Awotunde2024_CICIoT2023_Lightweight_ML.pdf`](../02_Publications_Proof/Awotunde2024_CICIoT2023_Lightweight_ML.pdf) |
+| **Bhandari et al.** [6] | **CIC-IoT-2023** | Resource-Aware RF & XGBoost | **96.80% – 97.90%** | 0.968 | [`Bhandari2026_CICIoT2023_ResourceAware_IDS.pdf`](../02_Publications_Proof/Bhandari2026_CICIoT2023_ResourceAware_IDS.pdf) |
+| **Amuthadevi et al.** [7] | IoT Benchmarks | TinyML Random Forest | **99.39%** | 0.994 | [`Amuthadevi2024_TinyML_IoT_IDS.pdf`](../02_Publications_Proof/Amuthadevi2024_TinyML_IoT_IDS.pdf) |
+| **Ali et al.** [8] | Edge IoT Testbeds | Edge-Native Decision Trees | **96.40% – 98.10%** | 0.970 | [`Ali2025_IEEE_IoT_Edge_IDS.pdf`](../02_Publications_Proof/Ali2025_IEEE_IoT_Edge_IDS.pdf) |
+| **My Unified Model (`pure_rf_multi`)** | **2017 + 2018 + 2019** | **Constrained RF (`pure_rf_multi`)** | **96.70%** | **0.952** | [`pure_rf_multi.py`](../03_Models_and_Training/pure_rf_multi.py) |
+| **My Physical IoT Evaluation** | **CIC-IoT-2023** | **Constrained RF (`pure_rf_multi`)** | **97.18%** | **0.961** | [`MULTI_DATASET_EVALUATION.md`](MULTI_DATASET_EVALUATION.md) |
 
 ---
 

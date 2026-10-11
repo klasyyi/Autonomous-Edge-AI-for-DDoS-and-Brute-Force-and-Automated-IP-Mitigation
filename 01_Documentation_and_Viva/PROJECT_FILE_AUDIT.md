@@ -26,9 +26,9 @@ Unlike conventional intrusion detection systems that offload packet captures to 
 
 | File | Type | Purpose in Simple Technical English |
 | :--- | :--- | :--- |
-| [`README.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/README.md) | Markdown | **Master Documentation Hub.** Explains my project objectives, multi-dataset accuracy benchmarks, hardware resource metrics, directory structure, and quickstart commands. |
-| [`sync_to_onedrive.ps1`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/sync_to_onedrive.ps1) | PowerShell Script | **Automated OneDrive Backup Script.** Synchronizes all code, datasets, and reports to my OneDrive backup directory (`OneDrive\Desktop\Final_Year_Final_Sem\FYP_Project`) with zero data loss. |
-| [`.gitignore`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/.gitignore) | Git Config | **Repository Filter.** Excludes temporary Python cache (`__pycache__`) and local editor files while retaining all project code, documentation, and benchmark datasets. |
+| [`README.md`](../README.md) | Markdown | **Master Documentation Hub.** Explains my project objectives, multi-dataset accuracy benchmarks, hardware resource metrics, directory structure, and quickstart commands. |
+| [`sync_to_onedrive.ps1`](../sync_to_onedrive.ps1) | PowerShell Script | **Automated OneDrive Backup Script.** Synchronizes all code, datasets, and reports to my OneDrive backup directory (`OneDrive\Desktop\Final_Year_Final_Sem\FYP_Project`) with zero data loss. |
+| [`.gitignore`](../.gitignore) | Git Config | **Repository Filter.** Excludes temporary Python cache (`__pycache__`) and local editor files while retaining all project code, documentation, and benchmark datasets. |
 
 ---
 
@@ -36,14 +36,14 @@ Unlike conventional intrusion detection systems that offload packet captures to 
 
 | File | Format | Technical Audit and Function |
 | :--- | :--- | :--- |
-| [`PROJECT_FILE_AUDIT.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/PROJECT_FILE_AUDIT.md) | Markdown | **This Document.** Exhaustive, plain-English technical audit of every component, dataset, model, and script across the entire repository. |
-| [`KEY_LEARNINGS_AND_OVERCOMING_CHALLENGES.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/KEY_LEARNINGS_AND_OVERCOMING_CHALLENGES.md) | Markdown | **Engineering Narrative.** Documents the 7 hardest technical problems I solved, including cross-dataset distribution collapse (from 22.64% to 96.70%), TinyML decision tree compilation, raw socket sniffing, and systemd daemonization. |
-| [`FYP_EXECUTIVE_SUMMARY.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/FYP_EXECUTIVE_SUMMARY.md) | Markdown | **One-Page Brief.** High-level overview of system design, performance benchmarks, and milestones for quick review. |
-| [`MULTI_DATASET_EVALUATION.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/MULTI_DATASET_EVALUATION.md) | Markdown | **Cross-Dataset Benchmark Proof.** Details how I resolved testbed overfitting by training across 2017, 2018, and 2019 datasets and validating against the 105-device `CIC-IoT-2023` benchmark. |
-| [`LITERATURE_COMPARISON_ACCURACY.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/LITERATURE_COMPARISON_ACCURACY.md) | Markdown | **Peer-Reviewed Benchmark Table.** Compares my 96.70% multi-dataset and 97.18% IoT accuracy scores against published research papers from IEEE, Elsevier, and Frontiers. |
-| [`LITERATURE_COMPARISON_EFFICIENCY.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/LITERATURE_COMPARISON_EFFICIENCY.md) | Markdown | **Hardware Efficiency Benchmarking.** Compares my 24 MB pure-Python solution against Jetson Nano, Google Coral Edge TPU, and standard deep learning frameworks. |
-| [`EVALUATION_METHODOLOGY.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/EVALUATION_METHODOLOGY.md) | Markdown | **Mathematical Formulations.** Defines Precision, Recall, F1-Score, Confusion Matrices, and the train-test isolation protocol I used to eliminate data leakage. |
-| [`VIVA_Results_and_Notes.md`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/01_Documentation_and_Viva/VIVA_Results_and_Notes.md) | Markdown | **Defense Q&A Prep.** Direct answers to common examination questions regarding class imbalance, feature reduction, latency trade-offs, and edge deployment. |
+| [`PROJECT_FILE_AUDIT.md`](PROJECT_FILE_AUDIT.md) | Markdown | **This Document.** Exhaustive, plain-English technical audit of every component, dataset, model, and script across the entire repository. |
+| [`KEY_LEARNINGS_AND_OVERCOMING_CHALLENGES.md`](KEY_LEARNINGS_AND_OVERCOMING_CHALLENGES.md) | Markdown | **Engineering Narrative.** Documents the 7 hardest technical problems I solved, including cross-dataset distribution collapse (from 22.64% to 96.70%), TinyML decision tree compilation, raw socket sniffing, and systemd daemonization. |
+| [`FYP_EXECUTIVE_SUMMARY.md`](FYP_EXECUTIVE_SUMMARY.md) | Markdown | **One-Page Brief.** High-level overview of system design, performance benchmarks, and milestones for quick review. |
+| [`MULTI_DATASET_EVALUATION.md`](MULTI_DATASET_EVALUATION.md) | Markdown | **Cross-Dataset Benchmark Proof.** Details how I resolved testbed overfitting by training across 2017, 2018, and 2019 datasets and validating against the 105-device `CIC-IoT-2023` benchmark. |
+| [`LITERATURE_COMPARISON_ACCURACY.md`](LITERATURE_COMPARISON_ACCURACY.md) | Markdown | **Peer-Reviewed Benchmark Table.** Compares my 96.70% multi-dataset and 97.18% IoT accuracy scores against published research papers from IEEE, Elsevier, and Frontiers. |
+| [`LITERATURE_COMPARISON_EFFICIENCY.md`](LITERATURE_COMPARISON_EFFICIENCY.md) | Markdown | **Hardware Efficiency Benchmarking.** Compares my 24 MB pure-Python solution against Jetson Nano, Google Coral Edge TPU, and standard deep learning frameworks. |
+| [`EVALUATION_METHODOLOGY.md`](EVALUATION_METHODOLOGY.md) | Markdown | **Mathematical Formulations.** Defines Precision, Recall, F1-Score, Confusion Matrices, and the train-test isolation protocol I used to eliminate data leakage. |
+| [`VIVA_Results_and_Notes.md`](VIVA_Results_and_Notes.md) | Markdown | **Defense Q&A Prep.** Direct answers to common examination questions regarding class imbalance, feature reduction, latency trade-offs, and edge deployment. |
 | `multi_dataset_evaluation_report.txt` | Text | **Raw Model Classification Output.** Stratified classification report across 23,062 unseen test flows showing individual Precision, Recall, and F1 scores per attack class. |
 | `Model_Evolution_and_Accuracy.txt` | Text | **Historical Model Progression Log.** Tracks accuracy improvements from initial baseline prototypes to my final universal multi-dataset model. |
 | `Findings_and_Tradeoffs.txt` | Text | **Engineering Trade-off Records.** Analyzes memory limits, packet queue sizing, sliding-window flow expiry, and CPU usage. |
@@ -74,8 +74,8 @@ This folder contains 12 verified PDF publications that I collected to support ev
 
 | File | Technical Role | Operation in Simple Technical English |
 | :--- | :--- | :--- |
-| [`train_multi_dataset.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/03_Models_and_Training/train_multi_dataset.py) | Training Pipeline | Loads 2017, 2018, and 2019 datasets, harmonizes feature schemas, balances training data with SMOTE, trains a 25-tree Random Forest, and exports pure Python code via `m2cgen`. |
-| [`pure_rf_multi.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/03_Models_and_Training/pure_rf_multi.py) | Compiled Model | 1.05 MB standalone Python code. Contains pure mathematical if-else decision trees. Evaluates an 8-feature vector and outputs class probabilities in 0.021 ms with **zero external dependencies**. |
+| [`train_multi_dataset.py`](../03_Models_and_Training/train_multi_dataset.py) | Training Pipeline | Loads 2017, 2018, and 2019 datasets, harmonizes feature schemas, balances training data with SMOTE, trains a 25-tree Random Forest, and exports pure Python code via `m2cgen`. |
+| [`pure_rf_multi.py`](../03_Models_and_Training/pure_rf_multi.py) | Compiled Model | 1.05 MB standalone Python code. Contains pure mathematical if-else decision trees. Evaluates an 8-feature vector and outputs class probabilities in 0.021 ms with **zero external dependencies**. |
 | `train_v2.py` | Historical Training | Previous iteration training pipeline trained solely on 2017 traffic (preserved for ablation study). |
 | `pure_rf_v2.py` | Historical Model | Previous 3-class compiled model based on single-dataset training. |
 | `evaluate_model.py` | Evaluation Script | Standalone evaluation testbed calculating stratified metrics and classification reports. |
@@ -96,13 +96,13 @@ This folder contains 12 verified PDF publications that I collected to support ev
 
 | File | Technical Role | Operation in Simple Technical English |
 | :--- | :--- | :--- |
-| [`dashboard.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/05_Gateway_Runtime/dashboard.py) | Core Gateway Engine | Runs on the Raspberry Pi. Sniffs raw network packets asynchronously, maintains active flow tables in RAM, invokes `pure_rf_multi.py` every 5 packets, drops offending IPs via `iptables`, logs telemetry, and renders the terminal UI. |
+| [`dashboard.py`](../05_Gateway_Runtime/dashboard.py) | Core Gateway Engine | Runs on the Raspberry Pi. Sniffs raw network packets asynchronously, maintains active flow tables in RAM, invokes `pure_rf_multi.py` every 5 packets, drops offending IPs via `iptables`, logs telemetry, and renders the terminal UI. |
 | `pure_rf_multi.py` | Edge Runtime Model | Exact copy of the compiled 1.05 MB model stored in the runtime directory for clean local imports. |
-| [`gateway.service`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/05_Gateway_Runtime/gateway.service) | Linux Daemon Config | `systemd` unit configuration file. Enables headless auto-boot on device startup with `Restart=always` and logging directed to `journalctl`. |
-| [`setup_systemd.sh`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/05_Gateway_Runtime/setup_systemd.sh) | Service Installer | Shell script that installs `gateway.service` into `/etc/systemd/system/`, reloads the systemd daemon, and starts the service. |
-| [`check_pi_status.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/05_Gateway_Runtime/check_pi_status.py) | Remote Health Monitor | Connects to the Raspberry Pi over SSH (`192.168.137.2`), checks if `gateway.service` is active, displays system uptime, RAM usage, active `iptables` drop rules, and reads recent telemetry logs. |
-| [`deploy_remote.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/05_Gateway_Runtime/deploy_remote.py) | SSH Deployment Script | Transfers updated runtime files from my host laptop to the Raspberry Pi via SFTP and triggers service restarts automatically. |
-| [`deploy_to_pi.ps1`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/05_Gateway_Runtime/deploy_to_pi.ps1) | PowerShell Deployer | Alternative one-click Windows deployment script using SCP to transfer files to the Pi. |
+| [`gateway.service`](../05_Gateway_Runtime/gateway.service) | Linux Daemon Config | `systemd` unit configuration file. Enables headless auto-boot on device startup with `Restart=always` and logging directed to `journalctl`. |
+| [`setup_systemd.sh`](../05_Gateway_Runtime/setup_systemd.sh) | Service Installer | Shell script that installs `gateway.service` into `/etc/systemd/system/`, reloads the systemd daemon, and starts the service. |
+| [`check_pi_status.py`](../05_Gateway_Runtime/check_pi_status.py) | Remote Health Monitor | Connects to the Raspberry Pi over SSH (`192.168.137.2`), checks if `gateway.service` is active, displays system uptime, RAM usage, active `iptables` drop rules, and reads recent telemetry logs. |
+| [`deploy_remote.py`](../05_Gateway_Runtime/deploy_remote.py) | SSH Deployment Script | Transfers updated runtime files from my host laptop to the Raspberry Pi via SFTP and triggers service restarts automatically. |
+| [`deploy_to_pi.ps1`](../05_Gateway_Runtime/deploy_to_pi.ps1) | PowerShell Deployer | Alternative one-click Windows deployment script using SCP to transfer files to the Pi. |
 
 ---
 
@@ -110,11 +110,11 @@ This folder contains 12 verified PDF publications that I collected to support ev
 
 | File | Technical Role | Operation in Simple Technical English |
 | :--- | :--- | :--- |
-| [`plot_stress_test.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/06_Testing_and_Telemetry/plot_stress_test.py) | Graph Generator | Reads `stress_test_log.csv` and uses Matplotlib to generate two publication-ready figures: CPU/RAM over time and cumulative flows/latency over time. |
+| [`plot_stress_test.py`](../06_Testing_and_Telemetry/plot_stress_test.py) | Graph Generator | Reads `stress_test_log.csv` and uses Matplotlib to generate two publication-ready figures: CPU/RAM over time and cumulative flows/latency over time. |
 | `stress_test_log.csv` | Empirical Telemetry | Real-world continuous telemetry log recorded on the Raspberry Pi 4 every 5 minutes. Records timestamp, uptime, CPU%, RAM%, packets sniffed, benign/anomalous flows, active RAM flows, and average latency. |
 | `stress_test_cpu_ram.png` | Output Chart | Visual graph proving CPU stability (0.0% to 0.3%) and flatline RAM (10.1% to 11.6%) over hours of operation with zero memory leaks. |
 | `stress_test_latency_flows.png` | Output Chart | Visual graph showing cumulative flows processed, threat counts, and sub-millisecond inference latency (<0.1 ms). |
-| [`simulate_traffic.py`](file:///c:/Users/syara/.gemini/antigravity/scratch/FYP/06_Testing_and_Telemetry/simulate_traffic.py) | Traffic Generator | Generates synthetic network traffic from my laptop to the Pi, including normal HTTP connections, rapid SYN bursts, and SSH connection probes. |
+| [`simulate_traffic.py`](../06_Testing_and_Telemetry/simulate_traffic.py) | Traffic Generator | Generates synthetic network traffic from my laptop to the Pi, including normal HTTP connections, rapid SYN bursts, and SSH connection probes. |
 
 ---
 

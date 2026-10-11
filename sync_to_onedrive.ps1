@@ -1,5 +1,10 @@
-$src = "C:\Users\syara\.gemini\antigravity\scratch\FYP"
+$src = $PSScriptRoot
 $dst = "C:\Users\syara\OneDrive\Desktop\Final_Year_Final_Sem\FYP_Project"
+
+if ($src.TrimEnd('\') -eq $dst.TrimEnd('\')) {
+    Write-Host "[INFO] Already running from master FYP_Project folder: $dst" -ForegroundColor Green
+    exit 0
+}
 
 Write-Host "Syncing from: $src" -ForegroundColor Cyan
 Write-Host "Syncing to  : $dst" -ForegroundColor Cyan
