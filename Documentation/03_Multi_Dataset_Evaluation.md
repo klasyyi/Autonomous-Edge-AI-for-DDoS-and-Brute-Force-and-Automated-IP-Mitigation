@@ -1,13 +1,5 @@
 # Technical Report: Universal Multi-Dataset Benchmark and Generalization
 ## Resolving Testbed Overfitting in Edge Network Intrusion Detection
-
-> **Author:** Final Year Project Student (Computer Science / Cyber Security)  
-> **Research Focus:** Cross-Dataset Generalization and Overfitting Elimination for Edge Intrusion Detection  
-> **Evaluated Datasets:** CIC-IDS-2017, CSE-CIC-IDS2018, CIC-DDoS2019, CIC-IoT2023  
-> **Achieved Accuracy:** 96.70% (Universal Multi-Dataset Model) and 97.18% (Dedicated IoT Benchmark)
-
----
-
 ## 1. Executive Summary: The Testbed Overfitting Problem
 
 A central challenge in machine learning intrusion detection research is that evaluating a model on a single synthetic dataset can produce an artificially inflated accuracy score due to testbed homogeneity. To claim genuine generalization, an intrusion detection system must demonstrate consistent performance across diverse datasets collected across different years and network environments.
