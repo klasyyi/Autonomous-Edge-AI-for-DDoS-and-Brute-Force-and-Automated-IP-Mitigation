@@ -1,9 +1,6 @@
 # Key Learnings and Engineering Challenges Overcome
 ## From Theoretical Models to an Autonomous Edge-AI Gateway
 
-> **Author:** Final Year Project Student (Computer Science / Cyber Security)  
-> **Topic:** Development of an Autonomous Edge-AI Network Intrusion Detection Gateway
-
 ---
 
 ## Executive Summary: What Makes This Project Unique?
