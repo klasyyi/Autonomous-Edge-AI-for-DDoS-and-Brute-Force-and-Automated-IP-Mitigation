@@ -1,11 +1,4 @@
 # Viva Defense Notes and Experimental Results
-
-**Project:** Autonomous TinyML Edge-Security Gateway  
-**Author:** Final Year Project Candidate  
-**Target Hardware:** Raspberry Pi 4 Model B (4GB RAM, ARM Cortex-A72)  
-
----
-
 ## 1. Model Accuracy and Operational Performance
 
 In my final evaluations, the gateway classifier achieved the following empirical results:
