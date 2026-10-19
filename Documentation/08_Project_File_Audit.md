@@ -112,15 +112,15 @@ This folder contains 12 verified PDF publications that I collected to support ev
 
 | File | Technical Role | Operation in Simple Technical English |
 | :--- | :--- | :--- |
-| [`plot_stress_test.py`](../Testing/plot_stress_test.py) | Graph Generator | Reads telemetry logs and uses Matplotlib to generate two publication-ready figures: CPU/RAM over time and cumulative flows/latency over time. |
-| `stress_test_cpu_ram.png` | Output Chart | Visual graph proving CPU stability (0.0% to 0.3%) and flatline RAM (10.1% to 11.6%) over hours of operation with zero memory leaks. |
+| [`plot_stress_test.py`](../Testing/plot_stress_test.py) | Graph Generator | Reads telemetry logs and uses Matplotlib to generate two publication-ready figures: CPU/RAM longevity trends and cumulative flows/latency over time. |
+| `stress_test_cpu_ram.png` | Output Chart | Visual graph proving CPU stability (0.0% to 0.3%) and flatline RAM (10.1% to 11.6%) across hours of continuous operation with zero memory leaks. |
 | `stress_test_latency_flows.png` | Output Chart | Visual graph showing cumulative flows processed, threat counts, and sub-millisecond inference latency (<0.1 ms). |
-| [`simulate_traffic.py`](../Testing/simulate_traffic.py) | Traffic Generator | Generates synthetic network traffic from my laptop to the Pi, including normal HTTP connections, rapid SYN bursts, and SSH connection probes. |
+| [`simulate_traffic.py`](../Testing/simulate_traffic.py) | Traffic Generator & Stress Harness | Multi-threaded traffic generator and stress test harness. Supports benign sessions, rapid SYN floods, SSH brute-force probes, high-throughput multi-worker stress testing, and closed-loop mitigation verification. |
 
 #### Testing History Subfolder (`Testing/history/`)
 | File | Role |
 | :--- | :--- |
-| `history/history_stress_test_log.csv` | Real-world continuous telemetry log recorded on the Raspberry Pi 4 every 5 minutes during testbed execution. |
+| `history/history_stress_test_log.csv` | Real-world continuous telemetry log recorded on the Raspberry Pi 4 every 5 minutes during extended longevity soak execution. |
 
 ---
 

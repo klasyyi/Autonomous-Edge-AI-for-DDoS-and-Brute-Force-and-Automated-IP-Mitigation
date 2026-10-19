@@ -42,7 +42,7 @@ def generate_stress_test_charts(csv_file=CSV_PATH):
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))
     fig.autofmt_xdate()
 
-    plt.title('Raspberry Pi 4 Resource Utilization Over Time', fontsize=12, fontweight='bold', pad=15)
+    plt.title('Raspberry Pi 4 Extended Daemon Longevity & Memory Stability Soak Test\n(Continuous Background Execution Showing Zero Memory Leakage)', fontsize=11, fontweight='bold', pad=15)
     plt.tight_layout()
     output_fig1 = os.path.join(SCRIPT_DIR, "stress_test_cpu_ram.png")
     plt.savefig(output_fig1, bbox_inches='tight')
@@ -55,7 +55,7 @@ def generate_stress_test_charts(csv_file=CSV_PATH):
     ax_top.plot(df['timestamp'], df['anomalous_flows'], label='Blocked Threats', color='#d9534f', linewidth=1.6)
     ax_top.set_ylabel('Cumulative Flows', fontsize=10, fontweight='bold')
     ax_top.legend(loc='upper left', frameon=True)
-    ax_top.set_title('Cumulative Network Flows and Threat Mitigation', fontsize=11, fontweight='bold')
+    ax_top.set_title('Cumulative Ingestion Flows and Autonomous Mitigation Record', fontsize=11, fontweight='bold')
 
     ax_bot.plot(df['timestamp'], df['avg_latency_ms'], label='Inference Latency (ms)', color='#6f42c1', linewidth=1.6, marker='^', markersize=4)
     ax_bot.axhline(y=0.10, color='r', linestyle=':', label='Target Threshold (0.10ms)')

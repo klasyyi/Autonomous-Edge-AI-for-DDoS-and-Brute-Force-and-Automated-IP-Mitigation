@@ -84,6 +84,24 @@ def stress_test_logger_daemon():
 logger_thread = threading.Thread(target=stress_test_logger_daemon, daemon=True)
 logger_thread.start()
 
+FLOW_TTL_SECONDS = 60
+MAX_ACTIVE_FLOWS = 10000
+SYN_BURST_THRESHOLD = 30
+SYN_WINDOW_SECONDS = 3.0
+
+ip_syn_tracker = {}
+
+def apply_mitigation(target_ip, threat_type, reason_text):
+    if target_ip in WHITELIST_IPS or target_ip in blocked_ips:
+        return
+    try:
+        subprocess.run(["iptables", "-A", "INPUT", "-s", target_ip, "-j", "DROP"], check=False)
+        subprocess.run(["iptables", "-A", "FORWARD", "-s", target_ip, "-j", "DROP"], check=False)
+    except Exception:
+        pass
+    blocked_ips.add(target_ip)
+    stats["blocked_list"].insert(0, (target_ip, str(threat_type), reason_text))
+
 def extract_features(packet):
     stats["packets_sniffed"] += 1
 
@@ -94,12 +112,41 @@ def extract_features(packet):
     if src_ip in blocked_ips:
         return
 
+    current_time = time.time()
+
+    # Periodic sliding-window TTL eviction to prevent memory growth
+    if stats["packets_sniffed"] % 100 == 0:
+        stale_keys = [k for k, v in active_flows.items() if (current_time - v['last_time']) > FLOW_TTL_SECONDS]
+        for k in stale_keys:
+            del active_flows[k]
+        stale_ips = [ip for ip, timestamps in ip_syn_tracker.items() if timestamps and (current_time - timestamps[-1]) > SYN_WINDOW_SECONDS]
+        for ip in stale_ips:
+            del ip_syn_tracker[ip]
+
+    # Tier 1 Defense: Deterministic Layer-4 SYN Flood Rate Pre-Filter
+    if packet[TCP].flags & 0x02:
+        if src_ip not in ip_syn_tracker:
+            ip_syn_tracker[src_ip] = []
+        ip_syn_tracker[src_ip].append(current_time)
+        ip_syn_tracker[src_ip] = [t for t in ip_syn_tracker[src_ip] if current_time - t <= SYN_WINDOW_SECONDS]
+
+        if len(ip_syn_tracker[src_ip]) > SYN_BURST_THRESHOLD:
+            apply_mitigation(src_ip, "DDoS (L4 Volumetric)", f"SYN Burst ({len(ip_syn_tracker[src_ip])} pkts in {SYN_WINDOW_SECONDS}s)")
+            stats["anomalous_flows"] += 1
+            timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            stats["recent_logs"].insert(0, (timestamp, str(packet[TCP].dport), "DDoS (L4)", "<0.01ms"))
+            stats["recent_logs"] = stats["recent_logs"][:15]
+            return
+
     sport, dport = packet[TCP].sport, packet[TCP].dport
     flow_key = tuple(sorted([f"{src_ip}:{sport}", f"{dst_ip}:{dport}"]))
-    current_time = time.time()
     packet_length = len(packet)
 
     if flow_key not in active_flows:
+        if len(active_flows) >= MAX_ACTIVE_FLOWS:
+            oldest_key = min(active_flows, key=lambda k: active_flows[k]['last_time'])
+            del active_flows[oldest_key]
+
         active_flows[flow_key] = {
             'first_src': src_ip,
             'first_sport': sport,
@@ -133,10 +180,12 @@ def extract_features(packet):
         flow['fwd_length_sum'] += packet_length
     else:
         flow['bwd_packets'] += 1
-        flow['bwd_lengths'].append(packet_length)
+        if len(flow['bwd_lengths']) < 50:
+            flow['bwd_lengths'].append(packet_length)
 
     total_pkts = flow['fwd_packets'] + flow['bwd_packets']
 
+    # Tier 2 Defense: TinyML Layer-7 Behavioral Classification Engine
     if total_pkts % 5 == 0:
         flow_duration = (current_time - flow['start_time']) * 1000000
         iat_mean = (flow['iat_sum'] / flow['iat_count']) * 1000000 if flow['iat_count'] > 0 else 0
@@ -170,31 +219,19 @@ def extract_features(packet):
 
         explanation = "Normal Traffic"
         if prediction == "SSH-Patator":
-            explanation = "Brute-Force Pattern"
+            explanation = "TinyML: Brute-Force Pattern on Port 22"
         elif prediction == "DDoS":
-            explanation = "Flood Traffic"
-
-        if iat_mean < 1000 or flow['syn_count'] > 15:
-            prediction = "DDoS (Volumetric)"
-            explanation = f"High Packet Rate (SYNs: {flow['syn_count']}, IAT: {iat_mean:.0f}us)"
+            explanation = "TinyML: Volumetric Flood Signature"
 
         timestamp = datetime.now().strftime("%H:%M:%S.%f")[:-3]
 
         if prediction == "BENIGN":
             stats["benign_flows"] += 1
-            stats["recent_logs"].insert(0, (timestamp, str(flow['destination_port']), "BENIGN", f"{latency:.2f}ms"))
+            stats["recent_logs"].insert(0, (timestamp, str(flow['destination_port']), "BENIGN", f"{latency:.3f}ms"))
         else:
             stats["anomalous_flows"] += 1
-            stats["recent_logs"].insert(0, (timestamp, str(flow['destination_port']), str(prediction), f"{latency:.2f}ms"))
-
-            if src_ip not in WHITELIST_IPS and src_ip not in blocked_ips:
-                try:
-                    subprocess.run(["iptables", "-A", "INPUT", "-s", src_ip, "-j", "DROP"], check=False)
-                    subprocess.run(["iptables", "-A", "FORWARD", "-s", src_ip, "-j", "DROP"], check=False)
-                except Exception:
-                    pass
-                blocked_ips.add(src_ip)
-                stats["blocked_list"].insert(0, (src_ip, str(prediction), explanation))
+            stats["recent_logs"].insert(0, (timestamp, str(flow['destination_port']), str(prediction), f"{latency:.3f}ms"))
+            apply_mitigation(src_ip, str(prediction), explanation)
 
         stats["recent_logs"] = stats["recent_logs"][:15]
 

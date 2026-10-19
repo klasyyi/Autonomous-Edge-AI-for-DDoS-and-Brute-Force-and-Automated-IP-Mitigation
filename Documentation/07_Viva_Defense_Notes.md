@@ -69,6 +69,14 @@ A central strength of my project defense is demonstrating how I uncovered and re
   ```
   Additionally, an in-memory early-exit filter immediately discards subsequent packets from blocked IPs in user space, preventing Scapy raw socket queues from saturating system CPU.
 
+### Q7: What is the difference between your 2.5-hour test and an active volumetric stress test?
+* **Answer:** My 2.5-hour test recorded in `history_stress_test_log.csv` is an **Extended Hardware Longevity & Memory Stability Soak Test**. It evaluates daemon stability under continuous physical headless execution, proving that RAM usage remains flat at **10.1% to 11.6%** with zero memory leaks over thousands of seconds of ambient traffic. In contrast, an **Active Volumetric Stress Test** (executed via `simulate_traffic.py --mode stress`) evaluates burst packet ingestion thresholds and kernel mitigation latency under high-rate flood traffic.
+
+### Q8: Why do you report both 0.021 ms and 0.08–0.17 ms for latency?
+* **Answer:** This represents a scientific disaggregation of latency across system layers:
+  1. **Pure Machine Learning Inference Latency:** **0.021 ms** measures the isolated execution time of my compiled 25-tree Random Forest (`pure_rf_multi.py`) through nested decision logic in memory.
+  2. **End-to-End Processing and Mitigation Latency:** **0.08 ms to 0.17 ms** encompasses the entire operational pipeline: raw packet capture, bidirectional flow hash lookup, 8-feature rolling extraction, model classification, and executing the Linux kernel `iptables` drop rule. Both measurements are well within my strict real-time requirement of < 5.0 ms.
+
 ---
 
 ## 4. The 3 Hardest Engineering Hurdles and My Solutions

@@ -85,10 +85,10 @@ Production runtime software deployed on the Raspberry Pi edge device:
 
 ### 6. `Testing/`
 Edge load generation and telemetry analysis tools:
-- [`plot_stress_test.py`](Testing/plot_stress_test.py) — Matplotlib script that reads continuous telemetry and generates time-series charts.
-- `stress_test_cpu_ram.png` — Visual evidence showing CPU stability (0.0% to 0.3%) and flatline RAM usage (~10.1% to 11.6%).
+- [`plot_stress_test.py`](Testing/plot_stress_test.py) — Matplotlib script that reads continuous telemetry and generates publication-grade time-series charts.
+- `stress_test_cpu_ram.png` — Visual evidence showing CPU stability (0.0% to 0.3%) and flatline RAM usage (~10.1% to 11.6%) during extended longevity soak execution.
 - `stress_test_latency_flows.png` — Visual evidence showing microsecond latency and cumulative flow counters.
-- [`simulate_traffic.py`](Testing/simulate_traffic.py) — Traffic generator used to test benign sessions, volumetric SYN floods, and SSH brute-force probes against the gateway.
+- [`simulate_traffic.py`](Testing/simulate_traffic.py) — Multi-threaded traffic generator and stress testing harness supporting benign sessions, volumetric SYN floods, SSH brute force, and automated mitigation verification.
 - `history/` — Contains continuous telemetry logs recorded on the Raspberry Pi 4 (`history_stress_test_log.csv`).
 
 ---

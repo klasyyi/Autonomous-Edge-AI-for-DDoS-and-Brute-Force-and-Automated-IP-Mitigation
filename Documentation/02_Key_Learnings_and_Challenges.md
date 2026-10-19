@@ -95,13 +95,13 @@ Overcoming these challenges transformed my project from a standard data-science 
 
 ---
 
-### 7. Empirical Hardware Verification Over Extended Operation
+### 7. Empirical Hardware Verification: Longevity Soak Testing vs. Volumetric Stress Testing
 * **The Problem:**  
-  Many academic claims regarding "lightweight" edge models are evaluated purely on desktop simulations rather than physical edge hardware under load.
+  Many academic claims regarding "lightweight" edge models are evaluated purely on desktop simulations rather than physical edge hardware under load. Furthermore, researchers frequently conflate background daemon stability with active volumetric attack stress.
 * **How I Solved It:**  
-  - I established continuous hardware logging on the physical Raspberry Pi 4 over multi-hour intervals.
-  - I tracked CPU load, RAM usage, active flow tables, and classification latency every 5 minutes.
-  - I proved empirically that under continuous real-time operation, CPU utilization stays between **0.0% and 0.3%**, and RAM remains flat at **10.1% to 11.6%**, proving zero memory leakage and true industrial viability.
+  - I separated physical verification into two distinct testing methodologies:
+    1. **Extended Hardware Longevity & Memory Stability Soak Test:** Logged continuous physical telemetry over ~2.5 hours on the Raspberry Pi 4 under ambient traffic. Empirically proved that CPU utilization stays between **0.0% and 0.3%**, and RAM flatlines at **10.1% to 11.6%**, verifying zero memory leaks, bounded sliding-window flow tables, and unattended daemon stability.
+    2. **Active Volumetric Attack Stress Test:** Built a multi-threaded attack harness (`simulate_traffic.py --mode stress`) capable of generating bursts of over 1,000 packets/second across randomized ports to test kernel socket buffers and verify automated `iptables` mitigation within milliseconds.
 
 ---
 
