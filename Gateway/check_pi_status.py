@@ -1,12 +1,20 @@
-import paramiko
+import os
 import sys
+import paramiko
+import getpass
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-HOSTNAME = "192.168.137.2"
-USERNAME = "fyp1512"
-PASSWORD = "FYP@1512"
+HOSTNAME = os.getenv("PI_IP", "192.168.137.2")
+USERNAME = os.getenv("PI_USER", "fyp1512")
+PASSWORD = os.getenv("PI_PASSWORD")
+
+if not PASSWORD:
+    if sys.stdin.isatty():
+        PASSWORD = getpass.getpass(f"Enter SSH password for {USERNAME}@{HOSTNAME}: ")
+    else:
+        PASSWORD = os.getenv("PI_PASSWORD", "")
 
 def run_sudo(ssh, cmd):
     stdin, stdout, stderr = ssh.exec_command(f"sudo -S -p '' {cmd}")
@@ -16,6 +24,10 @@ def run_sudo(ssh, cmd):
     return stdout.read().decode('utf-8', errors='replace').strip()
 
 def main():
+    if not PASSWORD:
+        print("[-] Error: SSH password not provided. Set PI_PASSWORD environment variable.")
+        sys.exit(1)
+
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(HOSTNAME, port=22, username=USERNAME, password=PASSWORD, timeout=10)

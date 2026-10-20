@@ -8,7 +8,7 @@ __pycache__/
 .system_generated/
 AGENTS.md
 sync_to_onedrive.ps1
-History/
+/History/
 
 # Local data and transcripts
 *.jsonl

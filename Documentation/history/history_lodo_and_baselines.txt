@@ -1,0 +1,14 @@
+EMPIRICAL BENCHMARK: LEAVE-ONE-DATASET-OUT (LODO) AND BASELINE COMPARISONS
+
+1. LEAVE-ONE-DATASET-OUT (LODO) EXPERIMENTAL RESULTS
+Test_Dataset Train_Datasets  Accuracy  Macro_F1  Benign_FPR  Test_Flows
+        2018      2017+2019 14.698788  0.234324    0.071124       34411
+        2019      2017+2018  0.010000  0.000067    0.000000       20000
+        2017      2018+2019 39.211713  0.202938   10.410000       45897
+
+2. MODEL ARCHITECTURE BASELINE COMPARISONS
+Model                          | Accuracy   | Macro F1   | Benign FPR | Latency        
+1. Static Heuristic Rule       | 37.11    % | 0.4422     | 36.01    % | 0.0647        ms
+2. Logistic Regression         | 76.25    % | 0.7047     | 44.37    % | 0.0003        ms
+3. Single Decision Tree        | 93.60    % | 0.9180     | 13.22    % | 0.0002        ms
+4. Proposed Random Forest      | 97.12    % | 0.9608     | 0.19     % | 0.0018        ms

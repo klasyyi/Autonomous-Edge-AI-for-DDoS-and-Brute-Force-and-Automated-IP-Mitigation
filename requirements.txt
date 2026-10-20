@@ -1,0 +1,21 @@
+# Machine Learning & Data Processing (Host Development & Training)
+scikit-learn>=1.3.0
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+imbalanced-learn>=0.11.0
+m2cgen>=0.10.0
+pyarrow>=12.0.0
+
+# Visualization & Telemetry Plotting
+matplotlib>=3.7.0
+
+# Remote Edge Diagnostics & Deployment
+paramiko>=3.2.0
+
+# Edge Gateway Runtime (Raspberry Pi Dependencies)
+# Note: Machine learning inference on the Raspberry Pi uses pure-Python code (pure_rf_multi.py)
+# with zero runtime dependencies on scikit-learn, numpy, or scipy.
+scapy>=2.5.0
+rich>=13.4.0
+psutil>=5.9.0

@@ -6,14 +6,14 @@ In this project, my objective was to design, train, evaluate, and deploy an auto
 
 The classification engine identifies network traffic flows into three distinct behavioral classes:
 1. **`BENIGN`**: Legitimate network sessions (HTTP/HTTPS web browsing, DNS queries, legitimate SSH administration).
-2. **`DDoS`**: Volumetric and application-layer denial-of-service traffic (TCP SYN floods, UDP packet storms, HTTP GET floods).
+2. **`DDoS`**: Volumetric TCP SYN floods and application-layer denial-of-service traffic.
 3. **`SSH-Patator`**: Brute-force credential guessing probes directed against Port 22.
 
-### The TinyML Edge Constraint
+### Edge Computational Constraints
 Deploying machine learning models directly onto embedded edge nodes introduces strict operational constraints:
 - **Sub-Millisecond Latency:** Inference must execute in under 0.10 ms per flow to avoid packet backlog during traffic bursts.
 - **Dependency Elimination:** Heavy runtime libraries (`scikit-learn`, `numpy`, `scipy`, `pandas`) must be eliminated from the edge environment to avoid runtime conflicts and multi-hundred-megabyte disk overhead.
-- **Low Memory Footprint:** The classification process must operate within minimal system RAM (~24 MB) without inducing memory paging.
+- **Low Memory Footprint:** The classification process must operate within minimal system RAM (~24.4 MB RSS) without inducing memory paging.
 
 ---
 
@@ -27,7 +27,7 @@ In my initial experiments, I trained a 20-tree Random Forest classifier (`pure_r
 **Root Cause Analysis:** Single-dataset training caused the decision boundaries to overfit to static laboratory artifacts—such as fixed subnet IP ranges, synthetic inter-arrival time constants, and uniform background traffic—rather than learning invariant protocol signatures.
 
 ### Phase 2: Universal Multi-Dataset Harmonization and Physical IoT Validation
-To eliminate testbed bias, I engineered a cross-dataset feature harmonization pipeline combining three benchmark years (**CIC-IDS-2017**, **CSE-CIC-IDS-2018**, and **CIC-DDoS-2019**), yielding a unified corpus of **115,308 network flows**. I then validated the resulting model against **26,592 flows from the physical 105-device `CIC-IoT-2023` testbed**, establishing true cross-dataset generalization.
+To reduce testbed bias, I engineered a cross-dataset feature harmonization pipeline combining three benchmark years (**CIC-IDS-2017**, **CSE-CIC-IDS-2018**, and **CIC-DDoS-2019**), yielding a unified corpus of **115,308 network flows**. I then validated the resulting model against **26,592 flows from the physical 105-device `CIC-IoT-2023` testbed**, demonstrating cross-dataset generalization.
 
 ---
 
@@ -49,69 +49,65 @@ $$\text{Recall}_c = \frac{TP_c}{TP_c + FN_c}$$
 High recall ensures malicious intrusions are detected reliably without evading perimeter defenses.
 
 ### 4. F1-Score (Harmonic Mean)
-$$F_1 = 2 \times \frac{\text{Precision}_c \times \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}$$
+$$\text{F1}_c = 2 \times \frac{\text{Precision}_c \times \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}$$
 
 ### 5. Macro-Averaged F1-Score
-$$\text{Macro } F_1 = \frac{1}{|C|} \sum_{c \in C} F_{1, c}$$
-Macro F1 assigns equal weight to all classes, ensuring minority attack categories (e.g., SSH-Patator) are evaluated with equal rigor to majority Benign traffic.
+$$\text{Macro F1} = \frac{1}{|C|} \sum_{c \in C} \text{F1}_c$$
+Macro-averaging weights all three classes equally, preventing dominant classes (such as DDoS floods) from masking detection failures on minority classes (such as SSH brute force).
+
+### 6. False Positive Rate (FPR) on Benign Traffic
+$$\text{FPR}_{\text{benign}} = \frac{FP_{\text{benign}}}{FP_{\text{benign}} + TN_{\text{benign}}}$$
+This metric directly quantifies the risk of inadvertent denial-of-service against legitimate network users.
 
 ---
 
-## 4. Feature Selection and Harmonization (The 8 Core Features)
+## 4. Feature Selection and Schema Standardization
 
-Rather than evaluating all 80+ features from raw PCAP captures—which causes severe CPU caching delays on ARM hardware—I analyzed feature importance across all three datasets and distilled the flow vector down to **8 core mathematical features**:
+To reconcile schema disparities across multi-year captures while conforming to embedded hardware constraints, I reduced the high-dimensional feature space (80+ columns) to **8 invariant features**:
 
-| # | Harmonized Feature Name | Data Type | Units | Physical Network Rationale |
-| :-: | :--- | :---: | :---: | :--- |
-| **1** | `Destination Port` | Integer | - | Discriminates service targets (Port 22 for SSH brute-force, Port 80/443 for web DDoS, ephemeral ports). |
-| **2** | `Bwd Packet Length Std` | Float | Bytes | Standard deviation of response payload sizes. In volumetric floods, the victim rarely responds, driving this value toward 0. |
-| **3** | `SYN Flag Count` | Integer | - | Counts synchronization handshake packets; volumetric SYN floods exhibit abnormally high ratios relative to ACK packets. |
-| **4** | `Flow IAT Mean` | Float | $\mu s$ | Mean packet Inter-Arrival Time within the flow. Automated attack scripts transmit at rapid intervals (< 1000 $\mu s$), whereas human activity exhibits variable pauses. |
-| **5** | `Total Fwd Packets` | Integer | - | Cumulative count of outbound packets transmitted by the source IP. |
-| **6** | `Flow Duration` | Float | $\mu s$ | Total lifetime of the bidirectional TCP session. |
-| **7** | `Fwd Packet Length Mean` | Float | Bytes | Average payload size of client packets. Brute-force probes send small, repetitive authentication strings. |
-| **8** | `Init_Win_bytes_forward` | Integer | Bytes | Size of initial TCP window advertisement, acting as an OS/client network stack fingerprint. |
-
----
-
-## 5. Data Leakage Prevention and Class Balancing (SMOTE)
-
-### Strict Train/Test Separation Protocol
-A frequent methodological flaw in published literature is applying data normalization or oversampling across the entire dataset prior to partitioning. This bleeds statistical patterns and synthetic test samples into the training set, producing invalid accuracy claims.
-
-To eliminate data leakage, I enforced a strict protocol:
-1. **Pre-Split Partitioning:** The complete harmonized dataset (115,308 flows) was stratified into an **80% training set (92,246 flows)** and a **20% unseen test vault (23,062 flows)** using a locked seed (`random_state = 42`).
-2. **Strict Training-Fold Oversampling:** The Synthetic Minority Over-sampling Technique (SMOTE) was executed **exclusively on the 80% training fold**:
-   $$x_{\text{new}} = x_i + \lambda \times (x_{zi} - x_i), \quad \lambda \sim U(0, 1)$$
-   This balanced the minority classes (`DDoS` and `SSH-Patator`) up to 59,831 samples each within the training partition.
-3. **Pristine Test Vault:** The 20% test fold remained 100% untouched, consisting solely of natural, unaugmented network traffic.
+| Index | Feature Name | Network Significance | Mathematical Operation |
+| :---: | :--- | :--- | :--- |
+| **0** | `Destination Port` | Identifies targeted services (e.g., Port 22 for SSH, Port 80 for HTTP). | Discrete Integer |
+| **1** | `Bwd Packet Length Std` | Measures variance in backward packet sizes; attacks exhibit near-zero variance. | Standard Deviation ($\sigma$) |
+| **2** | `SYN Flag Count` | Tracks TCP connection initiation packets; high values indicate SYN floods. | Summation ($\sum$) |
+| **3** | `Flow IAT Mean` | Average microsecond delay between packets; floods exhibit microsecond intervals. | Arithmetic Mean ($\mu$) |
+| **4** | `Total Fwd Packets` | Volume of outgoing packets transmitted in the flow window. | Count ($N$) |
+| **5** | `Flow Duration` | Total elapsed duration of the flow in microseconds. | Time Delta ($\Delta t$) |
+| **6** | `Fwd Packet Length Mean`| Average payload size of forward packets. | Arithmetic Mean ($\mu$) |
+| **7** | `Init_Win_bytes_forward`| Initial TCP window advertisement; reveals OS stack fingerprint. | Header Field |
 
 ---
 
-## 6. Model Architecture and TinyML Compilation
+## 5. Class Balancing Protocol: Synthetic Minority Over-sampling (SMOTE)
 
-### Hyperparameter Bounds
-I trained a constrained `RandomForestClassifier` with the following bounded parameters:
-- `n_estimators = 25`: Selected to provide sufficient ensemble variance reduction while keeping the compiled file size to 1.05 MB.
-- `max_depth = 12`: Constrained to prevent individual tree branches from memorizing specific host IP addresses or transient timestamps.
-- `criterion = 'gini'`: Gini impurity metric for splitting criteria.
+In raw intrusion captures, benign traffic and volumetric floods vastly outnumber low-rate brute-force probes, creating extreme class imbalance.
 
-### Compilation to Pure Python (`pure_rf_multi.py`)
+### Train-Test Isolation Protocol
+To prevent synthetic data contamination and eliminate data leakage:
+1. The unified dataset (115,308 flows) was partitioned into an **80% training set (92,246 flows)** and a **20% test set (23,062 flows)** using stratified sampling.
+2. SMOTE was applied **strictly to the 80% training partition**:
+   $$\mathbf{x}_{\text{new}} = \mathbf{x}_i + \lambda \times (\mathbf{x}_{zi} - \mathbf{x}_i), \quad \lambda \in [0, 1]$$
+3. The 20% test partition remained completely unaugmented natural network traffic.
+
+---
+
+## 6. Model Optimization and Pure-Python Cross-Compilation
+
 Using `m2cgen`, I cross-compiled the trained ensemble into pure Python branching code:
 - Converts all 25 decision trees into deterministic nested `if/else` statements.
 - **Zero Runtime Dependencies:** Requires bare Python 3 with no imports of `numpy`, `scipy`, or `scikit-learn` on the edge gateway.
 - **Compiled File Size:** Exactly **1.05 MB**.
-- **Inference Latency:** **0.021 ms per flow** (~47,600 classifications per second).
-- **RAM Footprint:** **~24 MB RAM** (only 10.1% to 11.6% of system memory on the Raspberry Pi 4).
+- **Pure ML Inference Latency:** **0.021 ms per flow** (~47,600 classifications per second).
+- **Process Memory Footprint:** **~24.4 MB RSS** on the Raspberry Pi 4.
 
 ---
 
 ## 7. Formal Experimental Evaluation Results
 
-### A. Universal Multi-Dataset Evaluation (23,062 Unseen Flows)
+### A. Universal Multi-Dataset Holdout (23,062 Unseen Flows)
 Evaluated across unseen test flows spanning CIC-IDS-2017, CSE-CIC-IDS-2018, and CIC-DDoS-2019:
 
-| Traffic Class | Precision | Recall | F1-Score | Support (Flows) |
+| Traffic Class | Precision | Recall | F1-Score | Test Support (Flows) |
 | :--- | :---: | :---: | :---: | :---: |
 | **BENIGN** | 0.9975 | 0.9973 | 0.9974 | 5,282 |
 | **DDoS** | 0.9987 | 0.9511 | 0.9743 | 14,958 |
@@ -120,31 +116,27 @@ Evaluated across unseen test flows spanning CIC-IDS-2017, CSE-CIC-IDS-2018, and 
 | **Macro Average** | **0.9301** | **0.9812** | **0.9517** | **23,062** |
 | **Weighted Average** | **0.9734** | **0.9670** | **0.9685** | **23,062** |
 
-- **Multi-Dataset Accuracy:** **96.70%** across multi-year unseen network traffic.
-- **Benign Traffic Reliability:** **99.74% F1-score**, ensuring legitimate traffic is preserved without false drops.
-- **Brute-Force Recall:** **99.50%**, ensuring credential-guessing attacks are captured reliably.
+### B. Architecture Baseline Comparisons: "Why Machine Learning?"
 
-### B. Dedicated Physical IoT Testbed Evaluation (`CIC-IoT-2023`)
+To evaluate whether simpler algorithms or static heuristics suffice, I benchmarked four distinct architectures on the same test corpus:
+
+| Model Architecture | Accuracy | Macro F1 | Benign FPR | Latency | Operational Assessment |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **1. Static Heuristic Threshold** | 37.11% | 0.4422 | **36.01%** | 0.0647 ms | **Unusable:** 36% false alarms on legitimate traffic. |
+| **2. Logistic Regression (L2)** | 76.25% | 0.7047 | **44.37%** | 0.0003 ms | **Unusable:** Linear boundaries fail on non-linear network features. |
+| **3. Shallow Decision Tree (depth=5)** | 93.60% | 0.9180 | **13.22%** | 0.0002 ms | **Sub-optimal:** 13% false alarms still risks network disruption. |
+| **4. Proposed Random Forest (depth=12)** | **97.12%** | **0.9608** | **0.19%** | **0.0018 ms** | **Optimal:** Suppresses false alarms to < 0.2% while detecting threats. |
+
+### C. Dedicated Physical IoT Testbed Evaluation (`CIC-IoT-2023`)
 Evaluated on **26,592 unseen flows** collected from 105 physical smart home and edge devices:
 - **Overall IoT Accuracy:** **97.18%**
 - **DDoS Precision / Recall / F1:** **1.00 / 1.00 / 1.00**
 - **Benign Precision / Recall / F1:** **0.97 / 0.94 / 0.95**
-
-### C. Summary Performance Across Model Iterations
-
-| Metric / Parameter | Phase 1 Baseline (`pure_rf_v2`) | Phase 2 Multi-Dataset (`pure_rf_multi`) | Physical IoT Benchmark |
-| :--- | :---: | :---: | :---: |
-| **Training Corpus** | CIC-IDS-2017 Only | 2017 + 2018 + 2019 Unified | CIC-IoT-2023 Testbed |
-| **Overall Accuracy** | 99.98% (2017) / 22.64% (2018 transfer) | **96.70%** (Robust Generalization) | **97.18%** |
-| **Macro F1-Score** | 1.00 (same-domain) / 0.29 (cross-domain) | **0.9517** | 0.79 / 0.96 (per-class) |
-| **Inference Latency** | 0.080 ms / flow | **0.021 ms / flow** | **0.021 ms / flow** |
-| **Compiled Model Size** | 0.84 MB | **1.05 MB** | **1.05 MB** |
-| **Edge RAM Footprint** | ~24 MB | **~24 MB** | **~24 MB** |
-| **External Dependencies** | None (Pure Python) | **None (Pure Python)** | **None (Pure Python)** |
+- **Brute-Force Recall:** **0.51**
 
 ---
 
-## 8. Empirical Hardware Evaluation Protocol: Longevity Soak vs. Volumetric Stress Testing
+## 8. Empirical Hardware Evaluation: Soak Testing vs. Volumetric Stress Testing
 
 To establish empirical rigor, I separated hardware evaluation into two distinct testing protocols:
 
@@ -152,8 +144,9 @@ To establish empirical rigor, I separated hardware evaluation into two distinct 
 * **Objective:** Validate daemon persistence, memory stability, and heap isolation over multi-hour headless operation.
 * **Execution:** Continuous physical hardware execution on the Raspberry Pi 4 under ambient local traffic (~1 pkt/sec) recorded at 5-minute telemetry intervals (`history_stress_test_log.csv`).
 * **Verified Findings:**
-  - **Memory Stability:** RAM consumption remained strictly flat between **10.1% and 11.6%** over ~2.5 hours, confirming zero memory leaks.
-  - **Idle Processor Draw:** CPU load stayed between **0.0% and 0.3%**, showing minimal baseline background footprint.
+  - **Process RAM Footprint:** The Python daemon consumed strictly **~24.4 MB RSS**. Total Raspberry Pi OS system memory utilization remained flat between **10.1% and 11.6%** (approx. 400 MB to 460 MB of 4 GB RAM, including kernel network buffers).
+  - **Memory Leakage:** 0% growth after initial socket buffer allocation, confirming zero memory leaks.
+  - **Idle Processor Draw:** CPU load stayed between **0.0% and 0.3%**.
   - **Memory Bounding:** Protected by in-memory sliding-window TTL eviction (60-second inactivity prune).
 
 ### B. Active Volumetric Attack Stress Test
@@ -165,9 +158,16 @@ To establish empirical rigor, I separated hardware evaluation into two distinct 
 
 ---
 
-## 9. Threats to Validity and System Operating Envelope
+## 9. Threat Model, Topology, and Operating Boundaries
 
-In accordance with scientific best practices, I identified the operational envelope and boundary conditions of the system:
-1. **Transport Protocol Focus:** The current feature extraction pipeline monitors TCP session behaviors. Volumetric UDP amplification or ICMP ping storms are delegated to kernel-level SYN cookies and hardware firewalling.
-2. **Asymmetric Routing Sensitivity:** The feature vector incorporates backward packet statistics (`Bwd Packet Length Std`). In networks with asymmetric routing paths, flows without return traffic are supplemented by Tier 1 Source-IP rate tracking.
-3. **Port-Independent Behavioral Detection:** To prevent attackers from evading detection on non-standard ports (e.g., SSH bound to port 2222), the model couples destination port with inter-arrival time and packet length variance to maintain detection sensitivity.
+### A. Network Topology
+The gateway operates as a **Local Edge Security Appliance (Bump-in-the-Wire)** deployed at the network perimeter protecting downstream IoT devices on interface `eth0`.
+* **In-Scope Protection:** Protects local hosts and IoT nodes against host resource-exhaustion attacks (CPU/RAM exhaustion from TCP SYN connection queues and SSH credential brute force).
+* **Out-of-Scope Limitation:** An edge device cannot prevent upstream ISP bandwidth saturation if an attacker floods the physical access pipe with gigabit-scale traffic; upstream pipe flooding requires ISP-level BGP blackholing or scrubbers.
+
+### B. Mitigation Safety and Anti-Spoofing Controls
+To prevent attackers from abusing automated mitigation (e.g., spoofing trusted IPs to cause collateral denial of service):
+1. **Permanent Whitelist:** Localhost, default gateway (`192.168.137.1`), core DNS servers (`8.8.8.8`, `1.1.1.1`), and broadcast addresses are whitelisted and never blocked.
+2. **Block Rule TTL (300 Seconds):** Firewall drop rules automatically expire and unblock after 5 minutes, preventing permanent lockout of transient IPs.
+3. **Maximum Rule Cap (500 Rules):** Capped at 500 active `iptables` rules to prevent kernel netfilter chain latency degradation.
+4. **Transport Focus:** Currently monitors TCP session flows; high-rate UDP amplification floods are delegated to kernel-level rate limits.

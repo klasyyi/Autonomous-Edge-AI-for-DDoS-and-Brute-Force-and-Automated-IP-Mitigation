@@ -28,8 +28,11 @@ try:
 except Exception:
     pi_ip = "127.0.0.1"
 
-WHITELIST_IPS = {"192.168.137.1", "192.168.10.1", "127.0.0.1", pi_ip}
+WHITELIST_IPS = {"192.168.137.1", "192.168.10.1", "127.0.0.1", "8.8.8.8", "1.1.1.1", "255.255.255.255", pi_ip}
 blocked_ips = set()
+blocked_ip_timestamps = {}
+BLOCK_TTL_SECONDS = 300
+MAX_BLOCKED_RULES = 500
 active_flows = {}
 
 stats = {
@@ -94,12 +97,23 @@ ip_syn_tracker = {}
 def apply_mitigation(target_ip, threat_type, reason_text):
     if target_ip in WHITELIST_IPS or target_ip in blocked_ips:
         return
+    current_time = time.time()
+    if len(blocked_ips) >= MAX_BLOCKED_RULES:
+        oldest_ip = min(blocked_ip_timestamps, key=blocked_ip_timestamps.get)
+        blocked_ips.discard(oldest_ip)
+        del blocked_ip_timestamps[oldest_ip]
+        try:
+            subprocess.run(["iptables", "-D", "INPUT", "-s", oldest_ip, "-j", "DROP"], check=False)
+            subprocess.run(["iptables", "-D", "FORWARD", "-s", oldest_ip, "-j", "DROP"], check=False)
+        except Exception:
+            pass
     try:
         subprocess.run(["iptables", "-A", "INPUT", "-s", target_ip, "-j", "DROP"], check=False)
         subprocess.run(["iptables", "-A", "FORWARD", "-s", target_ip, "-j", "DROP"], check=False)
     except Exception:
         pass
     blocked_ips.add(target_ip)
+    blocked_ip_timestamps[target_ip] = current_time
     stats["blocked_list"].insert(0, (target_ip, str(threat_type), reason_text))
 
 def extract_features(packet):
@@ -122,6 +136,15 @@ def extract_features(packet):
         stale_ips = [ip for ip, timestamps in ip_syn_tracker.items() if timestamps and (current_time - timestamps[-1]) > SYN_WINDOW_SECONDS]
         for ip in stale_ips:
             del ip_syn_tracker[ip]
+        expired_blocks = [ip for ip, btime in blocked_ip_timestamps.items() if current_time - btime > BLOCK_TTL_SECONDS]
+        for ip in expired_blocks:
+            blocked_ips.discard(ip)
+            del blocked_ip_timestamps[ip]
+            try:
+                subprocess.run(["iptables", "-D", "INPUT", "-s", ip, "-j", "DROP"], check=False)
+                subprocess.run(["iptables", "-D", "FORWARD", "-s", ip, "-j", "DROP"], check=False)
+            except Exception:
+                pass
 
     # Tier 1 Defense: Deterministic Layer-4 SYN Flood Rate Pre-Filter
     if packet[TCP].flags & 0x02:
