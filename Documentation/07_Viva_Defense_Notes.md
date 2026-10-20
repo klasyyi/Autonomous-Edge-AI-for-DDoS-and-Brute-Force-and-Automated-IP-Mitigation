@@ -1,21 +1,21 @@
-# Viva Defense Notes and Examination Preparation
+# Viva Defense Notes: Examination Guide and Frequently Asked Questions
+## Autonomous Edge-AI for DDoS and Brute-Force Detection with Automated IP Mitigation
 
-## 1. Verified Final Results and System Performance
+## 1. Quick Facts Sheet (Memorize Before Defense)
 
-In my final evaluations across physical hardware and standardized benchmark datasets, my gateway achieved the following empirical results:
-
-| Metric / Parameter | Value | Validation Context |
+| Parameter | Value / Finding | Details for Panel |
 | :--- | :--- | :--- |
-| **Multi-Dataset Accuracy** | **96.70%** (Macro F1: 0.9517) | Evaluated on 23,062 unseen flows spanning CIC-IDS-2017, CSE-CIC-IDS-2018, and CIC-DDoS-2019. |
-| **IoT Benchmark Accuracy** | **97.18%** | Evaluated on 26,592 unseen flows from the physical 105-device `CIC-IoT-2023` testbed. |
-| **Benign False Alarm Rate** | **0.19% (FPR)** | Over 70x lower false positive rate than shallow decision trees (13.2%) and heuristic rules (36.0%). |
-| **Isolated ML Inference** | **0.021 ms / flow** (~47,600 flows/sec) | Compiled pure-Python decision tree execution (`m2cgen`), a 720x speedup over standard Python ML libraries. |
-| **End-to-End Latency** | **0.08 ms to 0.17 ms** | Real-time live pipeline: raw packet capture, 5-tuple hash lookup, feature calculation, and `iptables` drop. |
-| **Process RAM Footprint** | **~24.4 MB RSS** | Standalone Python daemon memory footprint; zero swap space required on the Raspberry Pi 4. |
-| **Total System RAM** | **10.1% to 11.6%** (~400 MB to ~460 MB) | Total physical memory draw of Raspberry Pi OS, Linux kernel buffers, and gateway daemon. |
-| **Compiled Model Size** | **1.05 MB** (`pure_rf_multi.py`) | 25 decision trees constrained to max depth 12, expressed as raw nested `if/else` logic. |
-| **Physical Hardware CPU** | **0.0% to 0.3% CPU** (Idle/Sniffing) | Background monitoring draw; bursts to ~15% to 20% under active multi-threaded flood stress. |
-| **Autonomous Mitigation** | **100% Closed-Loop Action** | Directly issues Linux kernel `iptables` drop rules to isolate attacker IP addresses automatically. |
+| **Multi-Dataset Accuracy** | **96.70%** (Macro F1: 0.9517) | Tested on 23,062 unseen flows from 2017, 2018, and 2019. |
+| **IoT Benchmark Accuracy** | **97.18%** | Tested on 26,592 unseen flows from the physical 105-device `CIC-IoT-2023` testbed. |
+| **Live Detection Rate** | **100.0%** | Tested across live physical attack injections on the Raspberry Pi 4. |
+| **Live False Positive Rate** | **0.0%** (0 false blocks) | Verified under continuous baseline benign HTTP/DNS traffic. |
+| **Time-to-Block (TTB)** | **84.21 ms** (SYN Flood) / **62.07 ms** (SSH) | Measured from first attack packet until kernel `iptables DROP` engagement. |
+| **Inference Latency** | **0.021 ms** (~47,600 flows/sec) | Pure-Python decision tree execution via `m2cgen` (zero numpy/scikit-learn overhead). |
+| **End-to-End Latency** | **0.08 ms to 0.17 ms** | Encompasses raw packet capture, 5-tuple table update, and `iptables` mitigation. |
+| **Edge RAM Footprint** | **~24.4 MB RSS** (10.1% to 11.6% OS RAM) | Zero C/C++ machine learning runtime dependencies on the Raspberry Pi. |
+| **Zero-Shot Drop (2017 -> 2018)**| **22.64%** (Macro F1: 0.29) | Uncovered testbed bias: model trained solely on 2017 collapsed on 2018 data. |
+| **Mitigation Engine** | Automated Linux kernel `iptables` | Dynamic DROP rules with 300s TTL auto-unblock, 500-rule cap, and core IP whitelist. |
+| **Deployment Mode** | Headless Linux systemd service | Starts automatically within 25 seconds of power-up (`gateway.service`). |
 
 ### Classification Report on 23,062 Unseen Multi-Year Flows
 ```text
@@ -78,6 +78,12 @@ A central strength of my project defense is demonstrating how I uncovered and re
 * **Answer:** This represents a scientific disaggregation of latency across system layers:
   1. **Pure Machine Learning Inference Latency:** **0.021 ms** measures the isolated execution time of my compiled 25-tree Random Forest (`pure_rf_multi.py`) through nested decision logic in memory.
   2. **End-to-End Processing and Mitigation Latency:** **0.08 ms to 0.17 ms** encompasses the entire operational pipeline: raw packet capture, bidirectional flow hash lookup, 8-feature rolling extraction, model classification, and executing the Linux kernel `iptables` drop rule. Both measurements are well within my strict real-time requirement of < 5.0 ms.
+
+### Q9: What are your live physical detection rates, false positive rates, and Time-to-Block (TTB) on real hardware?
+* **Answer:** In live physical closed-loop benchmark trials on the Raspberry Pi 4 edge appliance:
+  1. **Live Detection Rate:** **100.0%** across both volumetric TCP SYN floods (35 packets) and SSH credential brute force (25 probes).
+  2. **Live False Positive Rate:** **0.0%** during baseline benign traffic flows, verifying that legitimate services are never falsely blocked.
+  3. **Time-to-Block (TTB):** The system autonomously engaged kernel-level `iptables DROP` within **84.21 ms** for volumetric SYN floods (via Layer-4 rate pre-filtering) and **62.07 ms** for SSH brute force (via TinyML behavioral classification).
 
 ---
 

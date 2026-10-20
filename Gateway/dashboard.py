@@ -23,6 +23,19 @@ CLASS_LABELS = ["BENIGN", "DDoS", "SSH-Patator"]
 LOG_FILE = "stress_test_log.csv"
 LOG_INTERVAL_SECONDS = 300
 
+def get_sniff_iface():
+    try:
+        out = subprocess.check_output(['ip', '-br', 'addr']).decode('utf-8')
+        for line in out.splitlines():
+            parts = line.split()
+            if len(parts) >= 3 and parts[1] == 'UP' and '192.168' in parts[2]:
+                return parts[0]
+        if 'br0' in out:
+            return 'br0'
+    except Exception:
+        pass
+    return "eth0"
+
 try:
     pi_ip = subprocess.check_output(['hostname', '-I']).decode('utf-8').strip().split()[0]
 except Exception:
@@ -118,14 +131,11 @@ def apply_mitigation(target_ip, threat_type, reason_text):
 
 def extract_features(packet):
     stats["packets_sniffed"] += 1
-
-    if IP not in packet or TCP not in packet:
+    if not packet.haslayer(IP) or not packet.haslayer(TCP):
         return
 
-    src_ip, dst_ip = packet[IP].src, packet[IP].dst
-    if src_ip in blocked_ips:
-        return
-
+    src_ip = packet[IP].src
+    dst_ip = packet[IP].dst
     current_time = time.time()
 
     # Periodic sliding-window TTL eviction to prevent memory growth
@@ -314,7 +324,8 @@ def generate_dashboard():
     return layout
 
 if __name__ == "__main__":
-    sniffer = AsyncSniffer(iface="eth0", prn=extract_features, store=False)
+    active_iface = get_sniff_iface()
+    sniffer = AsyncSniffer(iface=active_iface, prn=extract_features, store=False)
     sniffer.start()
 
     with Live(generate_dashboard(), refresh_per_second=4) as live:

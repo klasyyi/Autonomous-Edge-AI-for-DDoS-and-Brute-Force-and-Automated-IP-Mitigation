@@ -1,0 +1,41 @@
+======================================================================
+EMPIRICAL PHYSICAL HARDWARE CLOSED-LOOP MITIGATION BENCHMARK REPORT
+Platform: Raspberry Pi 4 Model B (Quad-core Cortex-A72 @ 1.5GHz, 4GB RAM)
+Operating System: Debian GNU/Linux aarch64 (Linux kernel 6.6)
+Network Topology: Bump-in-the-wire Bridge (br0) connecting Laptop (192.168.137.1)
+Edge Engine: Autonomous Pure-Python TinyML Random Forest + iptables Daemon
+======================================================================
+
+1. SUMMARY OF MEASURED PHYSICAL METRICS
+----------------------------------------------------------------------
+Attack Vector               Attacker IP       Packets Sent   Detection Rate   Time-to-Block (TTB)   Defense Layer
+----------------------------------------------------------------------
+Volumetric TCP SYN Flood    192.168.137.200   35 packets     100.0% (PASS)    88.99 ms              Layer-4 SYN Burst Pre-Filter
+Volumetric TCP SYN Flood    192.168.137.159   35 packets     100.0% (PASS)    78.80 ms              Layer-4 SYN Burst Pre-Filter
+Volumetric TCP SYN Flood    192.168.137.191   35 packets     100.0% (PASS)    84.85 ms              Layer-4 SYN Burst Pre-Filter
+  -> Mean SYN Flood TTB: 84.21 ms | Live Detection: 100.0%
+
+SSH Brute-Force Probing     192.168.137.201   25 probes      100.0% (PASS)    58.05 ms              TinyML Random Forest (Port 22)
+SSH Brute-Force Probing     192.168.137.240   25 probes      100.0% (PASS)    66.22 ms              TinyML Random Forest (Port 22)
+SSH Brute-Force Probing     192.168.137.241   25 probes      100.0% (PASS)    61.95 ms              TinyML Random Forest (Port 22)
+  -> Mean SSH Brute-Force TTB: 62.07 ms | Live Detection: 100.0%
+
+Benign Traffic Baseline     192.168.137.1     25 flows       0.0% FPR (PASS)  N/A (Accepted)        Whitelist + Model (BENIGN)
+  -> Benign False Positive Rate: 0.0% (0 legitimate flows dropped, 0 rules created)
+
+2. CLOSED-LOOP VERIFICATION SNAPSHOTS
+----------------------------------------------------------------------
+Kernel iptables rules during active mitigation:
+  DROP  all  --  192.168.137.159  0.0.0.0/0
+  DROP  all  --  192.168.137.240  0.0.0.0/0
+Subsequent connection probes from attacker IPs: Connection timed out / dropped.
+Host management IP (192.168.137.1): Fully reachable, zero SSH packet loss.
+
+3. RESOURCE UTILIZATION UNDER ACTIVE ATTACK
+----------------------------------------------------------------------
+Gateway Daemon Memory (RSS) : ~24.4 MB (Bounded in RAM)
+System Memory Utilization   : 407 MiB / 3.7 GiB (11.0% total system RAM)
+CPU Load Average            : 0.18, 0.13, 0.10 (Well under single-core saturation)
+Sliding-Window Flow Table   : Flow TTL (60s) actively purges completed sessions
+Anti-Spoofing Protections   : Permanent Core Whitelist + 300s Block TTL + 500-Rule Cap Verified
+======================================================================

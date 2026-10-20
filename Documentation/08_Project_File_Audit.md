@@ -5,10 +5,10 @@
 In this project, I designed and built an autonomous Edge-AI security gateway to protect Internet of Things (IoT) and Local Area Network (LAN) devices against Distributed Denial of Service (DDoS) and SSH Brute-Force attacks.
 
 Unlike conventional intrusion detection systems that offload packet captures to cloud servers or depend on resource-heavy deep learning libraries, my solution:
-1. **Sniffs live network packets** directly on physical network interfaces (`eth0`/`wlan0`) using asynchronous raw sockets.
+1. **Sniffs live network packets** directly on physical network interfaces (`eth0`/`br0`) using asynchronous raw sockets.
 2. **Extracts 8 statistical flow features** in real time using an in-memory sliding-window table with time-to-live (TTL) eviction.
 3. **Classifies threats in 0.021 milliseconds** (pure ML inference) and 0.08 to 0.17 milliseconds (end-to-end processing) using a pure-Python Random Forest decision tree model with zero external library dependencies.
-4. **Mitigates attacks autonomously** by executing Linux kernel `iptables` rules to drop malicious traffic immediately, protected by safety whitelists, auto-unblock timers, and rule ceilings.
+4. **Mitigates attacks autonomously** by executing Linux kernel `iptables` rules to drop malicious traffic immediately (84.21 ms TTB for SYN floods; 62.07 ms TTB for SSH brute force), protected by safety whitelists, auto-unblock timers, and rule ceilings.
 5. **Starts automatically upon device boot** as an unattended Linux `systemd` background service.
 
 ---
@@ -19,7 +19,7 @@ Unlike conventional intrusion detection systems that offload packet captures to 
 
 | File | Type | Purpose in Simple Technical English |
 | :--- | :--- | :--- |
-| [`README.md`](../README.md) | Markdown | **Master Documentation Hub.** Explains my project objectives, multi-dataset accuracy benchmarks, hardware resource metrics, directory structure, and quickstart commands. |
+| [`README.md`](../README.md) | Markdown | **Master Documentation Hub.** Explains my project objectives, multi-dataset accuracy benchmarks, live physical mitigation metrics, hardware resource metrics, directory structure, and quickstart commands. |
 | [`LICENSE`](../LICENSE) | Text | **Open-Source License.** Standard MIT License granting open academic and practical reuse of the codebase and architectures. |
 | [`requirements.txt`](../requirements.txt) | Text | **Host Environment Dependencies.** Lists scikit-learn, pandas, imbalanced-learn, and m2cgen required strictly on the training workstation (the edge device requires zero external packages). |
 | [`.gitignore`](../.gitignore) | Git Config | **Repository Filter.** Excludes temporary Python cache (`__pycache__`), local environment files, and operating system artifacts from public Git tracking. |
@@ -37,8 +37,8 @@ The `Documentation` folder is organized with active, high-priority publications 
 | [`03_Multi_Dataset_Evaluation.md`](03_Multi_Dataset_Evaluation.md) | Markdown | **Cross-Dataset Benchmark Proof.** Details how I analyzed and reduced testbed overfitting by training across 2017, 2018, and 2019 datasets, evaluating Leave-One-Dataset-Out (LODO) domain collapse, and validating against the 105-device `CIC-IoT-2023` benchmark. |
 | [`04_Literature_Accuracy_Comparison.md`](04_Literature_Accuracy_Comparison.md) | Markdown | **Peer-Reviewed Benchmark Table.** Compares my 96.70% multi-dataset and 97.18% IoT accuracy scores against published research papers from IEEE, Elsevier, and Frontiers, with explicit context on differing feature sets and test protocols. |
 | [`05_Literature_Efficiency_Comparison.md`](05_Literature_Efficiency_Comparison.md) | Markdown | **Hardware Efficiency Benchmarking.** Compares my ~24.4 MB pure-Python solution against Jetson Nano, Google Coral Edge TPU, and standard deep learning frameworks, clarifying single-board computer versus microcontroller distinctions. |
-| [`06_Evaluation_Methodology.md`](06_Evaluation_Methodology.md) | Markdown | **Mathematical Formulations.** Defines Precision, Recall, F1-Score, Confusion Matrices, baseline classifier comparisons (Heuristics, Logistic Regression, Decision Trees), and data leakage isolation protocols. |
-| [`07_Viva_Defense_Notes.md`](07_Viva_Defense_Notes.md) | Markdown | **Defense Q&A Prep.** Direct answers to common examination questions regarding why ML is necessary, anti-spoofing mitigation safeguards, LODO failure dynamics, and longevity versus stress testing. |
+| [`06_Evaluation_Methodology.md`](06_Evaluation_Methodology.md) | Markdown | **Mathematical Formulations.** Defines Precision, Recall, F1-Score, Confusion Matrices, baseline classifier comparisons (Heuristics, Logistic Regression, Decision Trees), data leakage isolation protocols, and live physical closed-loop hardware mitigation results. |
+| [`07_Viva_Defense_Notes.md`](07_Viva_Defense_Notes.md) | Markdown | **Defense Q&A Prep.** Direct answers to common examination questions regarding why ML is necessary, anti-spoofing mitigation safeguards, LODO failure dynamics, longevity versus stress testing, and live Time-to-Block metrics. |
 | [`08_Project_File_Audit.md`](08_Project_File_Audit.md) | Markdown | **This Document.** Exhaustive, plain-English technical audit of every component, dataset, model, and script across the entire repository. |
 
 #### Documentation History Subfolder (`Documentation/history/`)
@@ -46,6 +46,7 @@ The `Documentation` folder is organized with active, high-priority publications 
 | :--- | :--- |
 | `history/history_multi_dataset_raw_report.txt` | Raw classification report across 23,062 unseen test flows showing individual Precision, Recall, and F1 scores per attack class. |
 | `history/history_lodo_and_baselines.txt` | Raw empirical logs of Leave-One-Dataset-Out cross-validation collapse across 2017/2018/2019 and comparison against baseline classifiers. |
+| `history/history_live_mitigation_benchmark.txt` | Raw empirical measurements of live physical attack mitigation on the Raspberry Pi 4 (100% detection rate, 0.0% FPR, 84.21 ms SYN flood TTB, 62.07 ms SSH brute force TTB). |
 | `history/history_model_evolution_log.txt` | Tracks historical accuracy improvements from initial baseline prototypes to my final universal multi-dataset model. |
 | `history/history_findings_and_tradeoffs.txt` | Engineering records analyzing memory limits, packet queue sizing, sliding-window flow expiry, and CPU usage. |
 | `history/history_baseline_2017_evaluation.txt` | Historical record of initial 99.98% evaluation on CIC-IDS-2017 data before multi-dataset harmonization. |
@@ -103,7 +104,7 @@ This folder contains 12 verified PDF publications and a formal bibliography that
 
 | File | Technical Role | Operation in Simple Technical English |
 | :--- | :--- | :--- |
-| [`dashboard.py`](../Gateway/dashboard.py) | Core Gateway Engine | Runs on the Raspberry Pi. Sniffs raw network packets asynchronously, maintains active flow tables in RAM with 60s TTL eviction, evaluates flows via `pure_rf_multi.py`, blocks malicious IPs via `iptables` (with permanent whitelist, 300s auto-unblock TTL, and 500-rule cap), logs telemetry, and renders the terminal UI. |
+| [`dashboard.py`](../Gateway/dashboard.py) | Core Gateway Engine | Runs on the Raspberry Pi. Sniffs raw network packets asynchronously, auto-detects active bridge (`br0`), maintains active flow tables in RAM with 60s TTL eviction, evaluates flows via `pure_rf_multi.py`, blocks malicious IPs via `iptables` (with permanent whitelist, 300s auto-unblock TTL, and 500-rule cap), logs telemetry, and renders the terminal UI. |
 | `pure_rf_multi.py` | Edge Runtime Model | Exact copy of the compiled 1.05 MB model stored in the runtime directory for clean local imports. |
 | [`gateway.service`](../Gateway/gateway.service) | Linux Daemon Config | `systemd` unit configuration file. Enables headless auto-boot on device startup with `Restart=always` and logging directed to `journalctl`. |
 | [`setup_systemd.sh`](../Gateway/setup_systemd.sh) | Service Installer | Shell script that installs `gateway.service` into `/etc/systemd/system/`, reloads the systemd daemon, and starts the service. |
@@ -117,6 +118,7 @@ This folder contains 12 verified PDF publications and a formal bibliography that
 
 | File | Technical Role | Operation in Simple Technical English |
 | :--- | :--- | :--- |
+| [`bench_live_mitigation.py`](../Testing/bench_live_mitigation.py) | Live Mitigation Benchmark | Executes real-time physical closed-loop attack trials against the Raspberry Pi 4 across volumetric SYN floods and SSH brute force, capturing precise empirical Time-to-Block (TTB) and kernel rule confirmation. |
 | [`plot_stress_test.py`](../Testing/plot_stress_test.py) | Graph Generator | Reads telemetry logs and uses Matplotlib to generate two publication-ready figures: CPU/RAM longevity trends and cumulative flows/latency over time. |
 | `stress_test_cpu_ram.png` | Output Chart | Visual graph proving CPU stability (0.0% to 0.3%) and flatline RAM (10.1% to 11.6% OS RAM; ~24.4 MB RSS daemon) across hours of extended longevity soak testing with zero memory leaks. |
 | `stress_test_latency_flows.png` | Output Chart | Visual graph showing cumulative flows processed, threat counts, and sub-millisecond inference latency (<0.1 ms). |
