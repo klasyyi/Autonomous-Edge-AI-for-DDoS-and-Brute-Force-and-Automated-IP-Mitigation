@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # Local environment and developer tooling
 .agents/
@@ -19,4 +20,3 @@ FULL_CHAT_TRANSCRIPT.md
 Thumbs.db
 .vscode/
 .idea/
-
