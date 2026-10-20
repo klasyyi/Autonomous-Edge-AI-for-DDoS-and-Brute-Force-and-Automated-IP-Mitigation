@@ -12,12 +12,12 @@ Overcoming these challenges transformed my project from a standard data-science 
           │ (Socket Sniffing)
           ▼
   [Flow Feature Aggregator]  <-- Sliding Window TTL and In-Memory State
-          │ (0.021 ms / flow)
+          │ (0.021 ms / flow pure ML, 0.08-0.17 ms end-to-end)
           ▼
   [Pure-Python Decision Engine] <-- Zero-Dependency Tree Compilation (m2cgen)
-          │ (96.70% Cross-Dataset)
+          │ (96.70% Multi-Dataset, 0.19% Benign FPR)
           ▼
-  [Autonomous Mitigation (iptables)] <-- Real-Time Closed-Loop Action
+  [Autonomous Mitigation (iptables)] <-- Fail-Safe Whitelists, 300s TTL, Rule Cap
           │
           ▼
   [Headless Systemd Daemon] <-- Zero-Touch Plug-and-Play Resilience
@@ -35,7 +35,7 @@ Overcoming these challenges transformed my project from a standard data-science 
 * **How I Solved It:**  
   - I constructed a cross-dataset feature harmonization matrix aligning heterogeneous schemas (`Dst Port` to `Destination Port`, `Tot Fwd Pkts` to `Total Fwd Packets`, etc.).
   - I harmonized and merged multi-year attack distributions across **CIC-IDS-2017**, **CSE-CIC-IDS-2018**, and **CIC-DDoS-2019** (115,308 flows).
-  - I validated the retrained unified model against **`CIC-IoT-2023`**, proving that the model restored generalized detection capability to **96.70%** (multi-year test fold) and **97.18%** (IoT real-device testbed).
+  - I validated the retrained unified model against **`CIC-IoT-2023`**, demonstrating that the model restored generalized detection capability to **96.70%** (multi-year test fold) and **97.18%** (IoT real-device testbed).
 
 ---
 
@@ -47,9 +47,9 @@ Overcoming these challenges transformed my project from a standard data-science 
   - I used **`m2cgen`** (Model to Code Generator) to compile my trained Random Forest ensemble directly into raw, dependency-free Python mathematical logic (`pure_rf_multi.py`).
   - **Results:**
     - Edge inference requires **zero external libraries** (runs on bare `python3`).
-    - Base RAM footprint reduced to **~24 MB** (only 10.1% to 11.6% of total system RAM).
+    - Base RAM footprint reduced to **~24.4 MB RSS daemon memory** (~400 to 460 MB total OS RAM, 10.1% to 11.6% of 4 GB Raspberry Pi 4).
     - Standalone model footprint reduced to **1.05 MB** (`pure_rf_multi.py`).
-    - Inference latency dropped to **0.021 ms per flow** (~47,600 flows/second).
+    - Inference latency dropped to **0.021 ms per flow** pure ML evaluation (~47,600 flows/second) and **0.08 to 0.17 ms** end-to-end packet processing.
 
 ---
 
@@ -86,12 +86,15 @@ Overcoming these challenges transformed my project from a standard data-science 
 
 ### 6. Bridging Passive Detection to Closed-Loop Autonomous Mitigation
 * **The Problem:**  
-  Most published NIDS systems are passive—they write an alert to a CSV log file or send an alert email. By the time a human operator reads the alert, a DDoS attack has already saturated the link or a brute-force attacker has compromised the host.
+  Most published NIDS systems are passive—they write an alert to a CSV log file or send an alert email. By the time a human operator reads the alert, a DDoS attack has already saturated the link or a brute-force attacker has compromised the host. Furthermore, unconstrained firewall blocking introduces vulnerabilities: attackers can spoof legitimate IPs to cause a self-inflicted Denial of Service, or exhaust kernel memory with thousands of rules.
 * **How I Solved It:**  
   - I linked my inference engine directly to the Linux kernel firewall subsystem via **`iptables`**.
   - When the pure-Python classifier detects a malicious flow (DDoS or Brute Force) with high confidence, it immediately issues a kernel-level rule to drop further packets from the offending IP address:
     `iptables -I INPUT -s <Attacker_IP> -j DROP`
-  - This transformed the gateway from a passive monitoring script into an **autonomous active defense system**.
+  - I implemented critical fail-safe mechanisms:
+    1. **Core Infrastructure Whitelist:** Protected default gateways, DNS resolvers (`8.8.8.8`, `1.1.1.1`), and loopback from ever being blocked.
+    2. **Block TTL Auto-Unblock:** Set an automated 300-second timer to purge temporary block rules, allowing recovery if an IP was spoofed.
+    3. **Firewall Rule Cap:** Enforced a strict 500-rule limit with FIFO eviction to prevent kernel table exhaustion.
 
 ---
 
@@ -100,7 +103,7 @@ Overcoming these challenges transformed my project from a standard data-science 
   Many academic claims regarding "lightweight" edge models are evaluated purely on desktop simulations rather than physical edge hardware under load. Furthermore, researchers frequently conflate background daemon stability with active volumetric attack stress.
 * **How I Solved It:**  
   - I separated physical verification into two distinct testing methodologies:
-    1. **Extended Hardware Longevity & Memory Stability Soak Test:** Logged continuous physical telemetry over ~2.5 hours on the Raspberry Pi 4 under ambient traffic. Empirically proved that CPU utilization stays between **0.0% and 0.3%**, and RAM flatlines at **10.1% to 11.6%**, verifying zero memory leaks, bounded sliding-window flow tables, and unattended daemon stability.
+    1. **Extended Hardware Longevity & Memory Stability Soak Test:** Logged continuous physical telemetry over ~2.5 hours on the Raspberry Pi 4 under ambient traffic. Empirically proved that CPU utilization stays between **0.0% and 0.3%**, and RAM flatlines at **10.1% to 11.6%** total OS memory (~24.4 MB RSS daemon), verifying zero memory leaks, bounded sliding-window flow tables, and unattended daemon stability.
     2. **Active Volumetric Attack Stress Test:** Built a multi-threaded attack harness (`simulate_traffic.py --mode stress`) capable of generating bursts of over 1,000 packets/second across randomized ports to test kernel socket buffers and verify automated `iptables` mitigation within milliseconds.
 
 ---

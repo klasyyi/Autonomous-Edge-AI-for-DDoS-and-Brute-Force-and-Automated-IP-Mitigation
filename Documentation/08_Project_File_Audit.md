@@ -129,6 +129,16 @@ This folder contains 12 verified PDF publications and a formal bibliography that
 
 ---
 
+### tests/ (Automated Unit and Safety Regression Test Suite)
+
+| File | Technical Role | Operation in Simple Technical English |
+| :--- | :--- | :--- |
+| [`test_model.py`](../tests/test_model.py) | ML Inference Test | Verifies zero external dependency imports, checks output probability vector structure, validates Benign, DDoS, and SSH-Patator classifications against ground-truth vectors, and enforces sub-0.1 ms latency constraints. |
+| [`test_mitigation_safety.py`](../tests/test_mitigation_safety.py) | Anti-Spoofing Safety Test | Verifies permanent IP whitelist protection for core infrastructure, validates 300-second block TTL auto-unblock, enforces the 500-rule iptables cap, and tests 60-second sliding-window flow eviction. |
+| [`test_flow_features.py`](../tests/test_flow_features.py) | Feature Extraction Test | Verifies real-time 8-feature mathematical extraction, standard deviation calculations, and safe division handling under zero-packet edge cases. |
+
+---
+
 ## 3. Code Sanitization and Comment Audit
 
 I audited and sanitized all code files in the repository:

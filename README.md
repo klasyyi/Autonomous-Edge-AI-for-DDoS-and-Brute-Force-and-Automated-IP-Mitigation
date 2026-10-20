@@ -28,6 +28,7 @@ FYP/
 ├── Datasets/            # Harmonized benchmark datasets (2018, 2019, and 2023)
 ├── Gateway/             # Production edge gateway engine, terminal UI, and systemd service
 ├── Testing/             # Traffic simulation scripts, stress test plots, and telemetry history
+├── tests/               # Automated unit, latency, flow feature, and fail-safe mitigation test suite
 ├── LICENSE              # MIT License
 ├── requirements.txt     # Python environment dependencies
 └── README.md            # Master project documentation
@@ -51,7 +52,7 @@ Technical reports, methodology documentation, defense notes, and historical logs
 
 ### 2. `Publications/`
 12 Peer-reviewed and arXiv research papers that I collected as empirical proof for my project defense:
-- [`REFERENCES.md`](Publications/REFERENCES.md) — Comprehensive bibliographic citations, DOIs, and BibTeX entries for all 12 referenced papers.
+- [`REFERENCES.md`](Publications/REFERENCES.md) — Comprehensive academic bibliography containing complete bibliographic metadata, DOIs, publication venues, and BibTeX citations for all 12 referenced papers.
 - `Sharafaldin2018_CICIDS2017.pdf` — ICISSP foundation paper introducing the CIC-IDS-2017 dataset.
 - `Zhou2019_CICIDS2017_Ensemble.pdf` — Springer research on feature selection and tree ensembles for network security.
 - `Karim2020_CSE_CIC_IDS2018_Features.pdf` — Feature selection study on the CSE-CIC-IDS-2018 dataset.
@@ -95,9 +96,20 @@ Edge load generation and telemetry analysis tools:
 - [`simulate_traffic.py`](Testing/simulate_traffic.py) — Multi-threaded traffic generator and stress testing harness supporting benign sessions, volumetric SYN floods, SSH brute force, and automated mitigation verification.
 - `history/` — Contains continuous telemetry logs recorded on the Raspberry Pi 4 (`history_stress_test_log.csv`).
 
+### 7. `tests/`
+Automated unit, latency, and fail-safe safety verification suite:
+- [`tests/test_model.py`](tests/test_model.py) — Validates pure-Python decision tree predictions across Benign, DDoS, and SSH-Patator traffic, checks zero-dependency imports, and asserts sub-0.1 ms latency constraints.
+- [`tests/test_mitigation_safety.py`](tests/test_mitigation_safety.py) — Validates fail-safe anti-spoofing mitigation: infrastructure whitelist protection, 300-second block TTL auto-unblock, 500-rule ceiling cap, and 60-second sliding-window flow table eviction.
+- [`tests/test_flow_features.py`](tests/test_flow_features.py) — Validates real-time 8-feature vector extraction, mathematical formulas, and safe division handling under zero-packet edge cases.
+
 ---
 
 ## Quick Start and Verification Commands
+
+### Run Automated Unit and Safety Tests
+```powershell
+python -m unittest discover tests
+```
 
 ### Check Live Edge Gateway Status
 ```powershell
