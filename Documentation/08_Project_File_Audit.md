@@ -118,16 +118,21 @@ This folder contains 12 verified PDF publications and a formal bibliography that
 
 | File | Technical Role | Operation in Simple Technical English |
 | :--- | :--- | :--- |
+| [`stress_test_24h_runner.py`](../Testing/stress_test_24h_runner.py) | 24-Hour Diurnal Soak Runner | Executes the 24-hour diurnal reliability test over physical Ethernet. Manages 288 checkpoints, dispatches continuous benign traffic, triggers hourly attack pulses, queries remote Pi telemetry over SSH, logs 14 parameters, and inhibits Windows sleep. |
+| [`plot_24h_stress.py`](../Testing/plot_24h_stress.py) | 24-Hour Telemetry Plotter | Reads `history_24h_stress_log.csv` and renders publication-grade time-series figures showing CPU %, RAM MB, SoC temperature, and physical Time-to-Block over the 24-hour cycle. |
+| `stress_test_24h_telemetry.png` | Publication Chart | Visual evidence proving CPU stability (mean 25.61%), cool SoC temperature (mean 38.81 °C), and flatline RAM (83.54 MB RSS) across the full 24-hour soak test with zero memory leakage. |
+| `stress_test_24h_mitigation.png` | Publication Chart | Visual evidence showing physical Time-to-Block (85.72 ms DDoS, 62.83 ms SSH) across 20 live attack pulses and 15,381 benign flows with 0.000% False Positive Rate. |
 | [`bench_live_mitigation.py`](../Testing/bench_live_mitigation.py) | Live Mitigation Benchmark | Executes real-time physical closed-loop attack trials against the Raspberry Pi 4 across volumetric SYN floods and SSH brute force, capturing precise empirical Time-to-Block (TTB) and kernel rule confirmation. |
-| [`plot_stress_test.py`](../Testing/plot_stress_test.py) | Graph Generator | Reads telemetry logs and uses Matplotlib to generate two publication-ready figures: CPU/RAM longevity trends and cumulative flows/latency over time. |
-| `stress_test_cpu_ram.png` | Output Chart | Visual graph proving CPU stability (0.0% to 0.3%) and flatline RAM (10.1% to 11.6% OS RAM; ~24.4 MB RSS daemon) across hours of extended longevity soak testing with zero memory leaks. |
-| `stress_test_latency_flows.png` | Output Chart | Visual graph showing cumulative flows processed, threat counts, and sub-millisecond inference latency (<0.1 ms). |
-| [`simulate_traffic.py`](../Testing/simulate_traffic.py) | Traffic Generator & Stress Harness | Multi-threaded traffic generator and stress test harness. Supports benign sessions, rapid SYN floods, SSH brute-force probes, high-throughput multi-worker stress testing, and closed-loop mitigation verification. |
+| [`plot_stress_test.py`](../Testing/plot_stress_test.py) | Graph Generator | Reads telemetry logs and uses Matplotlib to generate preliminary soak test figures. |
+| `stress_test_cpu_ram.png` | Output Chart | Preliminary visual graph showing hardware resource stability. |
+| `stress_test_latency_flows.png` | Output Chart | Preliminary visual graph showing cumulative flows processed. |
+| [`simulate_traffic.py`](../Testing/simulate_traffic.py) | Traffic Generator & Stress Harness | Multi-threaded traffic generator and stress test harness supporting benign sessions, rapid SYN floods, and SSH brute-force probes. |
 
 #### Testing History Subfolder (`Testing/history/`)
 | File | Role |
 | :--- | :--- |
-| `history/history_stress_test_log.csv` | Real-world continuous telemetry log recorded on the Raspberry Pi 4 every 5 minutes during an extended longevity soak execution under ambient network traffic. |
+| `history/history_24h_stress_log.csv` | Full 288-checkpoint empirical telemetry dataset recorded during the continuous 24-hour physical soak test. Contains 14 metrics captured every 5 minutes. |
+| `history/history_stress_test_log.csv` | Preliminary telemetry log recorded on the Raspberry Pi 4 during early longevity testing. |
 
 ---
 

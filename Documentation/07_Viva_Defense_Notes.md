@@ -6,13 +6,14 @@
 | Parameter | Value / Finding | Details for Panel |
 | :--- | :--- | :--- |
 | **Multi-Dataset Accuracy** | **96.70%** (Macro F1: 0.9517) | Tested on 23,062 unseen flows from 2017, 2018, and 2019. |
-| **IoT Benchmark Accuracy** | **97.18%** | Tested on 26,592 unseen flows from the physical 105-device `CIC-IoT-2023` testbed. |
-| **Live Detection Rate** | **100.0%** | Tested across live physical attack injections on the Raspberry Pi 4. |
-| **Live False Positive Rate** | **0.0%** (0 false blocks) | Verified under continuous baseline benign HTTP/DNS traffic. |
-| **Time-to-Block (TTB)** | **84.21 ms** (SYN Flood) / **62.07 ms** (SSH) | Measured from first attack packet until kernel `iptables DROP` engagement. |
+| **IoT Benchmark Accuracy** | **97.18%** | Tested zero-shot on 26,592 unseen flows from the physical 105-device `CIC-IoT-2023` testbed. |
+| **Live Detection Rate** | **100.0%** (20 / 20 attack pulses) | Verified across live physical attack injections on the Raspberry Pi 4 throughout 24h cycle. |
+| **Live False Positive Rate** | **0.000%** (0 false blocks) | Verified across 15,381 physical benign ingress sessions over 24 continuous hours. |
+| **Time-to-Block (TTB)** | **85.72 ms** (DDoS) / **62.83 ms** (SSH) | Measured from first attack packet until kernel `iptables DROP` engagement. |
 | **Inference Latency** | **0.021 ms** (~47,600 flows/sec) | Pure-Python decision tree execution via `m2cgen` (zero numpy/scikit-learn overhead). |
-| **End-to-End Latency** | **0.08 ms to 0.17 ms** | Encompasses raw packet capture, 5-tuple table update, and `iptables` mitigation. |
-| **Edge RAM Footprint** | **~24.4 MB RSS** (10.1% to 11.6% OS RAM) | Zero C/C++ machine learning runtime dependencies on the Raspberry Pi. |
+| **End-to-End Latency** | **0.08 ms to 0.17 ms** | Encompasses raw packet capture, 5-tuple table update, and model classification. |
+| **24-Hour Soak Test** | **24.0 Hours (288 Checkpoints)** | Ran continuously on physical Ethernet with zero memory leaks (RSS flat at 83.54 MB). |
+| **Thermal Headroom** | **38.81 °C mean (41.4 °C peak)** | Operates passively cooled, > 38 °C below the 80.0 °C thermal throttle limit. |
 | **Zero-Shot Drop (2017 -> 2018)**| **22.64%** (Macro F1: 0.29) | Uncovered testbed bias: model trained solely on 2017 collapsed on 2018 data. |
 | **Mitigation Engine** | Automated Linux kernel `iptables` | Dynamic DROP rules with 300s TTL auto-unblock, 500-rule cap, and core IP whitelist. |
 | **Deployment Mode** | Headless Linux systemd service | Starts automatically within 25 seconds of power-up (`gateway.service`). |
@@ -71,19 +72,19 @@ A central strength of my project defense is demonstrating how I uncovered and re
 ### Q6: Does your 96.70% accuracy prove zero-shot generalization across all future attacks?
 * **Answer:** No. In my Leave-One-Dataset-Out (LODO) experiments, training on 2017+2018 and evaluating on 2019 dropped accuracy significantly because attack vectors evolved (e.g., application-layer HTTP floods in 2017 vs. 0-byte payload SYN floods in 2019). The 96.70% score proves the model is a **Multi-Domain Conditioned Model** that successfully captures the union of transport-layer and application-layer threat profiles when cross-conditioned across heterogeneous captures.
 
-### Q7: What is the difference between your 2.5-hour test and an active volumetric stress test?
-* **Answer:** My 2.5-hour test recorded in `history_stress_test_log.csv` is an **Extended Hardware Longevity & Memory Stability Soak Test**. It evaluates daemon stability under continuous physical headless execution, proving that RAM usage remains flat at **10.1% to 11.6%** with zero memory leaks over thousands of seconds of ambient traffic. In contrast, an **Active Volumetric Stress Test** (executed via `simulate_traffic.py --mode stress`) evaluates burst packet ingestion thresholds and kernel mitigation latency under high-rate flood traffic.
+### Q7: What is the significance of your 24-hour diurnal stress test?
+* **Answer:** My 24-hour test (288 checkpoints = 1,440 continuous minutes) recorded in `history_24h_stress_log.csv` is an **Extended Hardware Longevity & Memory Stability Soak Test**. It evaluates edge appliance stability under a realistic day-night cycle, proving that:
+  1. Daemon RAM usage remains flat at **83.54 MB** ($\sigma = 1.13$ MB) across 15,381 physical flows, proving zero memory leaks.
+  2. Core temperature stays cool at **38.81 °C** (passive cooling), never exceeding 41.4 °C (well below the 80.0 °C throttle limit).
+  3. The system maintained a **0.000% False Positive Rate** (zero legitimate sessions dropped).
 
-### Q8: Why do you report both 0.021 ms and 0.08–0.17 ms for latency?
+### Q8: Why do you report both 0.021 ms for inference and 70–90 ms for Time-to-Block?
 * **Answer:** This represents a scientific disaggregation of latency across system layers:
-  1. **Pure Machine Learning Inference Latency:** **0.021 ms** measures the isolated execution time of my compiled 25-tree Random Forest (`pure_rf_multi.py`) through nested decision logic in memory.
-  2. **End-to-End Processing and Mitigation Latency:** **0.08 ms to 0.17 ms** encompasses the entire operational pipeline: raw packet capture, bidirectional flow hash lookup, 8-feature rolling extraction, model classification, and executing the Linux kernel `iptables` drop rule. Both measurements are well within my strict real-time requirement of < 5.0 ms.
+  1. **Pure Machine Learning Inference Latency:** **0.021 ms** measures the isolated execution time of my compiled 25-tree Random Forest (`pure_rf_multi.py`) evaluating an 8-feature vector in memory. This directly validates my operational requirement of $< 5.0$ ms.
+  2. **Physical Closed-Loop Time-to-Block (TTB):** **85.72 ms** (SYN flood) and **62.83 ms** (SSH brute force) measures the complete real-world defense loop across physical Ethernet: accumulating an attack burst of 25 to 35 packets across physical wire buffers to prevent false alarms, evaluating the flow, and executing the Linux kernel `iptables -j DROP` rule.
 
-### Q9: What are your live physical detection rates, false positive rates, and Time-to-Block (TTB) on real hardware?
-* **Answer:** In live physical closed-loop benchmark trials on the Raspberry Pi 4 edge appliance:
-  1. **Live Detection Rate:** **100.0%** across both volumetric TCP SYN floods (35 packets) and SSH credential brute force (25 probes).
-  2. **Live False Positive Rate:** **0.0%** during baseline benign traffic flows, verifying that legitimate services are never falsely blocked.
-  3. **Time-to-Block (TTB):** The system autonomously engaged kernel-level `iptables DROP` within **84.21 ms** for volumetric SYN floods (via Layer-4 rate pre-filtering) and **62.07 ms** for SSH brute force (via TinyML behavioral classification).
+### Q9: Did the literature references you compared against measure Time-to-Block or inference?
+* **Answer:** The published literature (such as Hafid & Ezzouhairi 2024 and Amuthadevi et al. 2024) **strictly reported passive model inference and flow calculation times** (typically 15 to 50 ms) on saved files. None implemented real-time firewall mitigation over physical Ethernet. On that exact same metric, my model achieves **0.021 ms** (a 700x speedup). Furthermore, I went beyond published literature by implementing the full closed-loop physical defense on real hardware, neutralizing attacks in 85.72 ms.
 
 ---
 

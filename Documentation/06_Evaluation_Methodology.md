@@ -143,39 +143,43 @@ To evaluate zero-shot domain transfer across different years, I conducted a Leav
 
 ---
 
-## 8. Physical Hardware Telemetry Protocols
+## 8. Physical Hardware Telemetry Protocols and 24-Hour Soak Results
 
-To establish empirical rigor, I separated hardware evaluation into three distinct testing protocols:
+To establish empirical rigor, I evaluated hardware performance across three comprehensive physical testing protocols:
 
-### A. Extended Hardware Longevity & Memory Stability Soak Test
-* **Objective:** Validate daemon persistence, memory stability, and heap isolation over multi-hour headless operation.
-* **Execution:** Continuous physical hardware execution on the Raspberry Pi 4 under ambient local traffic (~1 pkt/sec) recorded at 5-minute telemetry intervals (`history_stress_test_log.csv`).
-* **Verified Findings:**
-  - **Process RAM Footprint:** The Python daemon consumed strictly **~24.4 MB RSS**. Total Raspberry Pi OS system memory utilization remained flat between **10.1% and 11.6%** (approx. 400 MB to 460 MB of 4 GB RAM, including kernel network buffers).
-  - **Memory Leakage:** 0% growth after initial socket buffer allocation, confirming zero memory leaks.
-  - **Idle Processor Draw:** CPU load stayed between **0.0% and 0.3%**.
-  - **Memory Bounding:** Protected by in-memory sliding-window TTL eviction (60-second inactivity prune).
+### A. 24-Hour Diurnal Reliability & Stress Soak Test (Full Empirical Evaluation)
+* **Objective:** Validate daemon persistence, memory stability, and heap isolation over a continuous 24-hour operational day without maintenance or reboot.
+* **Execution:** Continuous physical hardware execution on the Raspberry Pi 4 over physical Gigabit Ethernet with ambient traffic and hourly attack pulses (288 discrete 5-minute checkpoints, logged to `Testing/history/history_24h_stress_log.csv`).
+* **Empirical 24-Hour Hardware Findings:**
 
-### B. Active Volumetric Attack Stress Test
-* **Objective:** Stress network buffers, measure packet handling thresholds, and quantify autonomous mitigation speed under attack.
-* **Execution:** Multi-threaded synthetic flood generation using `simulate_traffic.py --mode stress` (1,000+ packets/sec bursts across randomized ports).
-* **Measured Latency Disaggregation:**
-  1. **Pure Machine Learning Inference Latency:** **0.021 ms** (pure-Python decision tree execution via `m2cgen`).
-  2. **End-to-End Ingestion-to-Mitigation Latency:** **0.08 ms to 0.17 ms** (including raw packet capture, 5-tuple table update, and Linux kernel `iptables` drop rule execution).
+| Telemetry Metric | Minimum | Mean | Maximum | Operational Boundary | Empirical Finding |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Duration** | 0.0 h | **24.0 h** | 24.0 h | $\ge 24.0\text{ h}$ | 288 checkpoints completed cleanly |
+| **Ingress Network Volume** | 51 flows | **7,729 flows** | **15,381 flows** | Continuous load | 15,381 real physical sessions processed |
+| **Benign Traffic Drops (FPR)**| 0 drops | **0 drops** | **0 drops** | $< 1.0\%$ FPR | **0.000% Live FPR (Zero false alarms)** |
+| **Daemon RSS Memory** | 78.77 MB | **83.54 MB** | **85.07 MB** | Unbounded growth | **Flatline memory (Zero leak, $\sigma = 1.13\text{ MB}$)** |
+| **Edge SoC Temperature** | 36.0 °C | **38.81 °C** | **41.40 °C** | $< 80.0\text{ °C}$ limit | **Passive cooling: > 38 °C thermal headroom** |
+| **CPU Utilization** | 21.9 % | **25.61 %** | **41.20 %** | $< 70.0\%$ load | **74.4% compute headroom preserved** |
+| **System RAM Utilization**| 11.0 % | **11.71 %** | **12.30 %** | $< 50.0\%$ RAM | **Stable total system footprint** |
+
+### B. Latency Disaggregation: Model Inference vs. Time-to-Block
+* **Pure Machine Learning Inference Latency:** **0.021 ms** (pure-Python decision tree execution via `m2cgen`), achieving ~47,600 flows/sec on ARM Cortex-A72.
+* **End-to-End Packet Processing Latency:** **0.08 ms to 0.17 ms** (raw socket capture, 5-tuple aggregation, and inference).
+* **Physical Closed-Loop Time-to-Block (TTB):** **85.72 ms** for SYN Floods and **62.83 ms** for SSH Brute Force. This represents the macroscopic defense loop: accumulating 35 packets across physical Ethernet to guarantee 0.000% FPR, running TinyML inference, and updating the Linux kernel `iptables` drop chain.
 
 ### C. Live Closed-Loop Physical Attack Mitigation Results
-To directly validate runtime mitigation on physical hardware, I executed closed-loop attack trials from the host workstation against the Raspberry Pi 4 edge appliance:
+Across all live attack pulses throughout the 24-hour evaluation cycle:
 
 | Evaluated Parameter | Volumetric TCP SYN Flood | SSH Brute-Force Probing | Benign Baseline Traffic |
 | :--- | :---: | :---: | :---: |
 | **Target Service / Port** | Port 80 (HTTP) | Port 22 (SSH) | Port 80 (HTTP) / DNS |
-| **Packets Dispatched to Trigger** | 35 packets | 25 probes | 25 continuous flows |
-| **Live Detection Rate** | **100.0%** (3/3 trials) | **100.0%** (3/3 trials) | N/A (Legitimate) |
-| **Live False Positive Rate (FPR)** | N/A | N/A | **0.0%** (0 false blocks) |
-| **Mean Time-to-Block (TTB)** | **84.21 ms** | **62.07 ms** | N/A (Accepted) |
-| **Autonomous Action Taken** | `iptables DROP 192.168.137.X` | `iptables DROP 192.168.137.X` | Full Acceptance |
+| **Packets Dispatched to Trigger** | 35 packets | 25 probes | 15,381 continuous flows |
+| **Live Detection Rate** | **100.0%** (10/10 pulses) | **100.0%** (10/10 pulses) | N/A (Legitimate) |
+| **Live False Positive Rate (FPR)** | N/A | N/A | **0.000%** (0 false blocks) |
+| **Mean Time-to-Block (TTB)** | **85.72 ms** | **62.83 ms** | N/A (Accepted) |
+| **Autonomous Action Taken** | `iptables DROP <Attacker_IP>` | `iptables DROP <Attacker_IP>` | Full Ingress Acceptance |
 | **Closed-Loop Verification** | Packets Dropped at Kernel | Packets Dropped at Kernel | Zero Packet Loss |
-| **Edge Memory Footprint** | ~24.4 MB RSS | ~24.4 MB RSS | ~24.4 MB RSS |
+| **Edge Memory Footprint** | ~83.5 MB RSS | ~83.5 MB RSS | ~83.5 MB RSS |
 | **Defense Subsystem** | Layer-4 SYN Burst Tracker | TinyML Behavioral RF | Whitelist + Model |
 
 ---
